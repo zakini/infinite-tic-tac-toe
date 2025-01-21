@@ -18,6 +18,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@stylistic/eslint-plugin": "^2.13.0",
+    "@total-typescript/ts-reset": "^0.6.1",
     "@types/eslint__eslintrc": "^2.1.2",
     "@types/node": "^20",
     "@types/react": "^19",
