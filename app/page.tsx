@@ -1,7 +1,9 @@
+import TicTacToeBoard from './components/tic-tac-toe-board'
+
 export default function Home() {
   return (
     <main>
-      <h1>Hello World</h1>
+      <TicTacToeBoard />
     </main>
   )
 }
