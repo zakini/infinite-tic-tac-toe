@@ -5,6 +5,7 @@ import stylistic from '@stylistic/eslint-plugin'
 import { Linter } from 'eslint'
 import tseslint from 'typescript-eslint'
 import { FlatConfig } from '@typescript-eslint/utils/ts-eslint'
+import tailwind from 'eslint-plugin-tailwindcss'
 
 // eslint configs are kinda weirdly structured
 // see: https://github.com/typescript-eslint/typescript-eslint/issues/8613
@@ -20,9 +21,6 @@ const compat = new FlatCompat({
 const eslintConfig = [
   // nextjs defaults
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
-
-  // code style
-  stylistic.configs['recommended-flat'],
 
   // we use eslint instead of next lint so that root files are linted too
   // eslint doesn't know to ignore this generated folder though
@@ -45,6 +43,10 @@ const eslintConfig = [
     ...tseslint.configs.disableTypeChecked,
     files: ['**/*.mjs'],
   },
+
+  // code style
+  stylistic.configs['recommended-flat'],
+  ...tailwind.configs['flat/recommended'],
 
   // the bikeshed
   {

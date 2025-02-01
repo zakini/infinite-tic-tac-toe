@@ -32,7 +32,7 @@ export default function TicTacToeBoard({ parentPath = [], disabled = null }: Pro
   const win = findWin(boardState)
 
   return (
-    <div className="grid grid-cols-3 aspect-square w-full bg-black gap-px">
+    <div className="grid aspect-square w-full grid-cols-3 gap-px bg-black">
       {boardState.map((cell, i) => isBoardState(cell)
         ? (
             <TicTacToeBoard
