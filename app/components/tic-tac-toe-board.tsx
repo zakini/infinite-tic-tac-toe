@@ -76,9 +76,10 @@ const useGameStore = create(combine(
 
 type Props = {
   boardState?: BoardState | null
+  disabled?: boolean | null
 }
 
-export default function TicTacToeBoard({ boardState: inputState }: Props) {
+export default function TicTacToeBoard({ boardState: inputState = null, disabled = null }: Props) {
   const [boardState, setBoardState] = useState<BoardState>(
     inputState ?? (Array(9).fill(null) as BoardState),
   )
@@ -95,13 +96,13 @@ export default function TicTacToeBoard({ boardState: inputState }: Props) {
     <div className="grid grid-cols-3 aspect-square w-full bg-black gap-px">
       {boardState.map((cell, i) => isBoardState(cell)
         ? (
-            <TicTacToeBoard key={i} boardState={cell} />
+            <TicTacToeBoard key={i} boardState={cell} disabled={disabled || win !== null} />
           )
         : (
             <button
               key={i}
               className={`relative aspect-square ${win?.includes(i) ? 'bg-green-500' : 'bg-white'}`}
-              disabled={cell !== null || win !== null}
+              disabled={disabled || cell !== null || win !== null}
               onClick={() => {
                 setBoardState(b => setBoardStateIndex(b, i, turn))
                 toggleTurn()
