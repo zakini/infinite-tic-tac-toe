@@ -1,0 +1,138 @@
+import { BoardState, CellState, FilledCellState, isBoardState, Win } from './types'
+
+export const initialiseBoardState = (): BoardState => Array(9).fill(null) as BoardState
+
+export const setBoardStateWithPath = (b: BoardState, path: number[], v: FilledCellState): BoardState => {
+  if (path.length <= 0) throw new Error('Path cannot be empty')
+
+  const i = path[0]
+  const rest = path.slice(1)
+  const target = b[i]
+
+  let newState
+  if (rest.length <= 0) {
+    if (target !== null) {
+      throw new Error(`Attempted to set state for non-empty cell: ${JSON.stringify(b)} | ${JSON.stringify(path)} | ${v}`)
+    }
+
+    newState = [
+      ...b.slice(0, i),
+      v,
+      ...b.slice(i + 1),
+    ]
+  } else {
+    if (!isBoardState(target)) {
+      throw new Error(`Attempted to set nested state for non-nested cell: ${JSON.stringify(b)} | ${JSON.stringify(path)} | ${v}`)
+    }
+
+    newState = [
+      ...b.slice(0, i),
+      setBoardStateWithPath(target, rest, v),
+      ...b.slice(i + 1),
+    ]
+  }
+
+  if (!isBoardState(newState)) throw new Error(`New board state is invalid: ${JSON.stringify(newState)}`)
+  return newState
+}
+
+export const pickNestedBoardState = (boardState: BoardState, path: number[]): BoardState => {
+  for (const i of path) {
+    const maybeBoardState = boardState[i]
+    if (!isBoardState(maybeBoardState)) {
+      throw new Error(`Invalid path when picking state: ${JSON.stringify(path)} | ${JSON.stringify(boardState)}`)
+    }
+    boardState = maybeBoardState
+  }
+
+  return boardState
+}
+
+const resolveCellState = (cell: CellState): FilledCellState | null => isBoardState(cell)
+  ? findWin(cell)?.player ?? null
+  : cell
+
+export const findWin = (board: BoardState): Win | null => {
+  // The minimal(?) neighbours of each cell to check to find a win
+  /* eslint-disable @stylistic/no-multi-spaces */
+  const neighbourMap: Record<number, number[]> = {
+    0: [1, 3, 4], 1: [4], 2: [4, 5],
+    3: [4],       4: [],  5: [],
+    6: [7],       7: [],  8: [],
+  }
+  /* eslint-enable @stylistic/no-multi-spaces */
+
+  for (const k of Object.keys(neighbourMap)) {
+    const i = Number(k)
+    const cell = resolveCellState(board[i])
+
+    if (cell === null) continue
+
+    for (const j of neighbourMap[i]) {
+      if (cell !== resolveCellState(board[j])) continue
+
+      // check next cell in that line
+      const k = j + (j - i)
+
+      if (cell === resolveCellState(board[k])) {
+        return {
+          cells: [i, j, k],
+          player: cell,
+        }
+      }
+    }
+  }
+
+  return null
+}
+
+// TODO move this to a separate test file now that findWin() is exported?
+if (import.meta.vitest) {
+  const { it, expect, describe } = import.meta.vitest
+
+  const X = FilledCellState.X
+  const O = FilledCellState.O
+  const _ = null
+
+  describe('win finder', () => {
+    it('finds wins', () => {
+      const board: BoardState = [
+        X, _, O,
+        O, X, _,
+        _, _, X,
+      ]
+
+      expect(findWin(board)).toStrictEqual({
+        cells: [0, 4, 8],
+        player: X,
+      })
+    })
+
+    it('ignores lines of empty cells', () => {
+      const board: BoardState = [
+        X, _, O,
+        O, _, _,
+        _, _, X,
+      ]
+
+      expect(findWin(board)).toBeNull()
+    })
+
+    it('finds nested wins', () => {
+      const board: BoardState = [
+        X, _, O,
+        O, X, _,
+        _, _, [
+          X, _, O,
+          O, X, _,
+          _, _, X,
+        ],
+      ]
+
+      expect(findWin(board)).toStrictEqual({
+        cells: [0, 4, 8],
+        player: X,
+      })
+    })
+  })
+}
