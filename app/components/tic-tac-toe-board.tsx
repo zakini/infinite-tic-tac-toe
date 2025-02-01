@@ -1,6 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { create } from 'zustand'
+import { combine } from 'zustand/middleware'
+import { useShallow } from 'zustand/shallow'
 
 type FixedLengthArray<T, L extends number> = readonly T[] & { length: L }
 
@@ -15,7 +18,8 @@ enum FilledCellState {
 interface BoardState extends FixedLengthArray<CellState, 9> {}
 type CellState = null | FilledCellState | BoardState
 
-const isCellState = (v: unknown): v is CellState => v === null || (typeof v === 'string' && Object.values(FilledCellState).includes(v))
+const isCellState = (v: unknown): v is CellState => v === null
+  || (typeof v === 'string' && Object.values(FilledCellState).includes(v))
 const isBoardState = (v: unknown): v is BoardState => Array.isArray(v)
   && v.length === 9
   && v.every(e => isCellState(e) || isBoardState(e))
@@ -29,10 +33,6 @@ const setBoardStateIndex = (b: BoardState, i: number, v: FilledCellState): Board
   if (!isBoardState(arr)) throw new Error(`Board state does not have 9 elements: ${JSON.stringify(arr)}`)
   return arr
 }
-
-const toggleTurn = (t: FilledCellState): FilledCellState => t === FilledCellState.X
-  ? FilledCellState.O
-  : FilledCellState.X
 
 const findWin = (board: BoardState): FixedLengthArray<number, 3> | null => {
   // The minimal(?) neighbours of each cell to check to find a win
@@ -63,13 +63,28 @@ const findWin = (board: BoardState): FixedLengthArray<number, 3> | null => {
   return null
 }
 
+const useGameStore = create(combine(
+  {
+    turn: FilledCellState.X,
+  },
+  set => ({
+    toggleTurn: () => set(({ turn }) => ({
+      turn: turn === FilledCellState.X ? FilledCellState.O : FilledCellState.X,
+    })),
+  }),
+))
+
 type Props = {
   boardState?: BoardState | null
 }
 
 export default function TicTacToeBoard({ boardState: inputState }: Props) {
-  const [boardState, setBoardState] = useState<BoardState>(inputState ?? (Array(9).fill(null) as BoardState))
-  const [turn, setTurn] = useState(FilledCellState.X)
+  const [boardState, setBoardState] = useState<BoardState>(
+    inputState ?? (Array(9).fill(null) as BoardState),
+  )
+  const [turn, toggleTurn] = useGameStore(useShallow(
+    state => [state.turn, state.toggleTurn],
+  ))
   const win = findWin(boardState)
 
   useEffect(() => {
@@ -89,7 +104,7 @@ export default function TicTacToeBoard({ boardState: inputState }: Props) {
               disabled={cell !== null || win !== null}
               onClick={() => {
                 setBoardState(b => setBoardStateIndex(b, i, turn))
-                setTurn(t => toggleTurn(t))
+                toggleTurn()
               }}
             >
               <span className="absolute">{cell}</span>
