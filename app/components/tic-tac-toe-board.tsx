@@ -1,19 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
+type FixedLengthArray<T, L extends number> = readonly T[] & { length: L }
 
 enum FilledCellState {
   X = 'X',
   O = 'O',
 }
 
-type CellState = FilledCellState | null
-
-type FixedLengthArray<T, L extends number> = readonly T[] & { length: L }
 // 3 x 3 grid = 9 total cells
-type BoardState = FixedLengthArray<CellState, 9>
+// We _have_ to define this as an interface for the circular dependency to work
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface BoardState extends FixedLengthArray<CellState, 9> {}
+type CellState = null | FilledCellState | BoardState
 
-const isBoardState = (v: readonly CellState[]): v is BoardState => v.length === 9
+const isCellState = (v: unknown): v is CellState => v === null || (typeof v === 'string' && Object.values(FilledCellState).includes(v))
+const isBoardState = (v: unknown): v is BoardState => Array.isArray(v)
+  && v.length === 9
+  && v.every(e => isCellState(e) || isBoardState(e))
 
 const setBoardStateIndex = (b: BoardState, i: number, v: FilledCellState): BoardState => {
   const arr = [
@@ -58,26 +63,38 @@ const findWin = (board: BoardState): FixedLengthArray<number, 3> | null => {
   return null
 }
 
-export default function TicTacToeBoard() {
-  const [boardState, setBoardState] = useState<BoardState>(Array(9).fill(null) as BoardState)
+type Props = {
+  boardState?: BoardState | null
+}
+
+export default function TicTacToeBoard({ boardState: inputState }: Props) {
+  const [boardState, setBoardState] = useState<BoardState>(inputState ?? (Array(9).fill(null) as BoardState))
   const [turn, setTurn] = useState(FilledCellState.X)
   const win = findWin(boardState)
 
+  useEffect(() => {
+    setBoardState(inputState ?? (Array(9).fill(null) as BoardState))
+  }, [inputState])
+
   return (
-    <div className="grid grid-cols-3 aspect-square w-1/2 bg-black gap-px">
-      {boardState.map((cell, i) => (
-        <button
-          key={i}
-          className={`relative ${win?.includes(i) ? 'bg-green-500' : 'bg-white'}`}
-          disabled={cell !== null || win !== null}
-          onClick={() => {
-            setBoardState(b => setBoardStateIndex(b, i, turn))
-            setTurn(t => toggleTurn(t))
-          }}
-        >
-          <span className="absolute">{cell}</span>
-        </button>
-      ))}
+    <div className="grid grid-cols-3 aspect-square w-full bg-black gap-px">
+      {boardState.map((cell, i) => isBoardState(cell)
+        ? (
+            <TicTacToeBoard key={i} boardState={cell} />
+          )
+        : (
+            <button
+              key={i}
+              className={`relative aspect-square ${win?.includes(i) ? 'bg-green-500' : 'bg-white'}`}
+              disabled={cell !== null || win !== null}
+              onClick={() => {
+                setBoardState(b => setBoardStateIndex(b, i, turn))
+                setTurn(t => toggleTurn(t))
+              }}
+            >
+              <span className="absolute">{cell}</span>
+            </button>
+          ))}
     </div>
   )
 }
