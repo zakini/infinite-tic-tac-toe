@@ -40,9 +40,18 @@ const eslintConfig = [
       },
     },
   ),
+  // and ignore the type checked parts for non-ts files
   {
     ...tseslint.configs.disableTypeChecked,
     files: ['**/*.mjs'],
+  },
+
+  // the bikeshed
+  {
+    rules: {
+      '@stylistic/brace-style': ['error', '1tbs'],
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+    },
   },
 ] satisfies Config[]
 
