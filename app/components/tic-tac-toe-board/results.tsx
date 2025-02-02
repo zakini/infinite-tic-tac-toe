@@ -13,23 +13,17 @@ export default function Results({ win, className = 'relative' }: Props) {
 
   if (!win) return null
 
-  if (conceded) {
-    return (
-      <div className={className}>
-        <div className="absolute inset-0 bg-black opacity-50" />
-
-        <span>Game Over: {win.player} wins</span>
-      </div>
-    )
-  }
-
   return (
-    <div className={className}>
+    <div className={className} role="dialog" aria-labelledby="results-title">
       <div className="absolute inset-0 bg-black opacity-50" />
-      <div className="absolute flex gap-2">
-        <button className="bg-white" onClick={() => setConceded(true)}>Concede</button>
-        <button className="bg-white" onClick={() => goDeeper()}>Go Deeper</button>
-      </div>
+
+      <div id="results-title">Game Over: {win.player} wins</div>
+      {!conceded && (
+        <div className="absolute flex gap-2">
+          <button className="bg-white" onClick={() => setConceded(true)}>Concede</button>
+          <button className="bg-white" onClick={() => goDeeper()}>Go Deeper</button>
+        </div>
+      )}
     </div>
   )
 }
