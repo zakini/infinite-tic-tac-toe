@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import useGameStore from './store'
-import { Win } from './types'
+import { useShallow } from 'zustand/shallow'
+import { findWin } from './utils'
 
 type Props = {
-  win: Win | null
   className?: string
 }
 
-export default function Results({ win, className = 'relative' }: Props) {
+export default function Results({ className = 'relative' }: Props) {
   const [conceded, setConceded] = useState(false)
-  const goDeeper = useGameStore(state => state.goDeeper)
+  const [boardState, goDeeper] = useGameStore(useShallow(state => [state.boardState, state.goDeeper]))
+  const win = findWin(boardState)
 
   if (!win) return null
 
