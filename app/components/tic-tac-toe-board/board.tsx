@@ -14,6 +14,7 @@ export default function Board({ parentPath = [], disabled = null }: Props) {
   ))
   const boardState = pickNestedBoardState(fullBoardState, parentPath)
   const win = findWin(boardState)
+  const winCells = win ? win.cells : null
 
   return (
     <div className="grid aspect-square w-full grid-cols-3 gap-px bg-black">
@@ -28,7 +29,7 @@ export default function Board({ parentPath = [], disabled = null }: Props) {
         : (
             <button
               key={i}
-              className={`relative aspect-square ${win?.cells?.includes(i) ? 'bg-green-500' : 'bg-white'}`}
+              className={`relative aspect-square ${winCells?.includes(i) ? 'bg-green-500' : 'bg-white'}`}
               disabled={disabled || cell !== null || win !== null}
               onClick={() => {
                 takeTurn([...parentPath, i])

@@ -18,8 +18,12 @@ export type Win = {
   player: FilledCellState
 }
 
-export const isSimpleCellState = (v: unknown): v is SimpleCellState => v === null
+const isSimpleCellState = (v: unknown): v is SimpleCellState => v === null
   || (typeof v === 'string' && Object.values(FilledCellState).includes(v))
 export const isBoardState = (v: unknown): v is BoardState => Array.isArray(v)
   && v.length === 9
   && v.every(e => isSimpleCellState(e) || isBoardState(e))
+// NOTE type assertions are weird: https://github.com/microsoft/TypeScript/issues/34523#issuecomment-700491122
+export const assertIsBoardState: (v: unknown) => asserts v is BoardState = (v) => {
+  if (!isBoardState(v)) throw new Error(`Board state is invalid: ${JSON.stringify(v)}`)
+}

@@ -1,4 +1,4 @@
-import { BoardState, CellState, FilledCellState, isBoardState, Win } from './types'
+import { assertIsBoardState, BoardState, CellState, FilledCellState, isBoardState, Win } from './types'
 
 export const initialiseBoardState = (): BoardState => Array(9).fill(null) as BoardState
 
@@ -32,7 +32,7 @@ export const setBoardStateWithPath = (b: BoardState, path: number[], v: FilledCe
     ]
   }
 
-  if (!isBoardState(newState)) throw new Error(`New board state is invalid: ${JSON.stringify(newState)}`)
+  assertIsBoardState(newState)
   return newState
 }
 
@@ -48,11 +48,19 @@ export const pickNestedBoardState = (boardState: BoardState, path: number[]): Bo
   return boardState
 }
 
-const resolveCellState = (cell: CellState): FilledCellState | null => isBoardState(cell)
-  ? findWin(cell)?.player ?? null
-  : cell
+const resolveCellState = (cell: CellState): FilledCellState | null | false => {
+  if (!isBoardState(cell)) return cell
 
-export const findWin = (board: BoardState): Win | null => {
+  const win = findWin(cell)
+  return win === false ? false : (win?.player ?? null)
+}
+
+/**
+ * Check if the given board state has a win
+ * @param board The board state to check
+ * @returns win object if there is a win, false if there's a draw, null otherwise
+ */
+export const findWin = (board: BoardState): Win | null | false => {
   // The minimal(?) neighbours of each cell to check to find a win
   /* eslint-disable @stylistic/no-multi-spaces */
   const neighbourMap: Record<number, number[]> = {
@@ -62,11 +70,17 @@ export const findWin = (board: BoardState): Win | null => {
   }
   /* eslint-enable @stylistic/no-multi-spaces */
 
+  let movesAvailable = false
   for (const k of Object.keys(neighbourMap)) {
     const i = Number(k)
     const cell = resolveCellState(board[i])
 
-    if (cell === null) continue
+    if (cell === false) return false
+
+    if (cell === null) {
+      movesAvailable = true
+      continue
+    }
 
     for (const j of neighbourMap[i]) {
       if (cell !== resolveCellState(board[j])) continue
@@ -83,7 +97,7 @@ export const findWin = (board: BoardState): Win | null => {
     }
   }
 
-  return null
+  return movesAvailable ? null : false
 }
 
 // TODO move this to a separate test file now that findWin() is exported?
@@ -133,6 +147,20 @@ if (import.meta.vitest) {
         cells: [0, 4, 8],
         player: X,
       })
+    })
+
+    it('finds draws', () => {
+      // OXO
+      // OXX
+      // XOX
+
+      const board: BoardState = [
+        O, X, O,
+        O, X, X,
+        X, O, X,
+      ]
+
+      expect(findWin(board)).toBe(false)
     })
   })
 }

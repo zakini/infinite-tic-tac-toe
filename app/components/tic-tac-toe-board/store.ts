@@ -1,7 +1,17 @@
 import { create } from 'zustand'
 import { combine } from 'zustand/middleware'
 import { initialiseBoardState, setBoardStateWithPath } from './utils'
-import { BoardState, FilledCellState, isBoardState } from './types'
+import { assertIsBoardState, BoardState, CellState, FilledCellState, isBoardState } from './types'
+
+const clearBoard = (board: BoardState): BoardState => {
+  const newBoard: CellState[] = []
+  for (const i of board.keys()) {
+    newBoard[i] = isBoardState(board[i]) ? clearBoard(board[i]) : null
+  }
+
+  assertIsBoardState(newBoard)
+  return newBoard
+}
 
 const useGameStore = create(combine(
   {
@@ -22,12 +32,11 @@ const useGameStore = create(combine(
         ...initialState.slice(4 + 1),
       ]
 
-      if (!isBoardState(newState)) {
-        throw new Error(`New board state is invalid: ${JSON.stringify(newState)}`)
-      }
+      assertIsBoardState(newState)
 
       return { boardState: newState }
     }),
+    clearBoard: () => set(({ boardState }) => ({ boardState: clearBoard(boardState) })),
   }),
 ))
 
@@ -86,6 +95,54 @@ if (import.meta.vitest) {
 
       expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
       expect(useGameStore.getState().turn).toBe(FilledCellState.O)
+    })
+
+    it('can clear the board', () => {
+      useGameStore.setState({
+        boardState: [
+          O, X, O,
+          O, X, X,
+          X, O, X,
+        ],
+      })
+      const clearBoard = useGameStore.getState().clearBoard
+
+      const expectedBoardState: BoardState = [
+        _, _, _,
+        _, _, _,
+        _, _, _,
+      ]
+      clearBoard()
+
+      expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
+    })
+
+    it('can clear a nested board', () => {
+      useGameStore.setState({
+        boardState: [
+          O, X, O,
+          O, X, X,
+          X, O, [
+            X, _, O,
+            O, X, _,
+            _, _, X,
+          ],
+        ],
+      })
+      const clearBoard = useGameStore.getState().clearBoard
+
+      const expectedBoardState: BoardState = [
+        _, _, _,
+        _, _, _,
+        _, _, [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+      ]
+      clearBoard()
+
+      expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
     })
   })
 }

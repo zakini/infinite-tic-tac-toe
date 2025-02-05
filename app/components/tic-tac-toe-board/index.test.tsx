@@ -4,16 +4,13 @@ import TicTacToeBoard from '.'
 import userEvent from '@testing-library/user-event'
 
 describe('game board', () => {
-  const getCells = () => {
+  const performWin = async () => {
     const cells = screen.getAllByRole('button')
     expect(cells.length).toBe(9)
-    return cells
-  }
 
-  const performWin = async () => {
-    const cells = getCells()
-
-    // X clicks each cell in the top row, O clicks elsewhere
+    // XXX
+    // OO_
+    // ___
     await userEvent.click(cells[0])
     await userEvent.click(cells[3])
     await userEvent.click(cells[1])
@@ -21,9 +18,36 @@ describe('game board', () => {
     await userEvent.click(cells[2])
   }
 
-  it('has text and buttons on game over', async () => {
+  const performDraw = async () => {
+    const cells = screen.getAllByRole('button')
+    expect(cells.length).toBe(9)
+
+    // OXO
+    // OXX
+    // XOX
+    await userEvent.click(cells[4])
+    await userEvent.click(cells[0])
+    await userEvent.click(cells[6])
+    await userEvent.click(cells[2])
+    await userEvent.click(cells[1])
+    await userEvent.click(cells[7])
+    await userEvent.click(cells[5])
+    await userEvent.click(cells[3])
+    await userEvent.click(cells[8])
+  }
+
+  it('has text and buttons on win', async () => {
     render(<TicTacToeBoard />)
     await performWin()
+
+    expect(screen.getByRole('dialog')).toHaveTextContent(/game over/i)
+    expect(screen.getByText(/concede/i).closest('button')).toBeInTheDocument()
+    expect(screen.getByText(/go deeper/i).closest('button')).toBeInTheDocument()
+  })
+
+  it('has text and buttons on draw', async () => {
+    render(<TicTacToeBoard />)
+    await performDraw()
 
     expect(screen.getByRole('dialog')).toHaveTextContent(/game over/i)
     expect(screen.getByText(/concede/i).closest('button')).toBeInTheDocument()
@@ -41,7 +65,8 @@ describe('game board', () => {
 
   it('can go deeper', async () => {
     render(<TicTacToeBoard />)
-    const cells = getCells()
+    const cells = screen.getAllByRole('button')
+    expect(cells.length).toBe(9)
 
     await performWin()
 
@@ -56,5 +81,27 @@ describe('game board', () => {
     await userEvent.click(screen.getByText(/go deeper/i))
     // 8 cells at top level, 9 in a nested board
     expect(screen.getAllByRole('button').length).toBe(8 + 9)
+  })
+
+  it('clears the board when going deeper from a draw', async () => {
+    render(<TicTacToeBoard />)
+    let cells = screen.getAllByRole('button')
+    expect(cells.length).toBe(9)
+
+    await performDraw()
+
+    for (const cell of cells) {
+      expect(cell).not.toHaveClass('bg-green-500')
+    }
+
+    await userEvent.click(screen.getByText(/go deeper/i))
+    // 8 cells at top level, 9 in a nested board
+    cells = screen.getAllByRole('button')
+    expect(screen.getAllByRole('button').length).toBe(8 + 9)
+
+    for (const cell of cells) {
+      // All cells should be empty
+      expect(cell.textContent).toBe('')
+    }
   })
 })
