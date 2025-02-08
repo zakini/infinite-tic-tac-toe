@@ -65,7 +65,7 @@ describe('game board', () => {
 
   it('can go deeper', async () => {
     render(<TicTacToeBoard />)
-    const cells = screen.getAllByRole('button')
+    let cells = screen.getAllByRole('button')
     expect(cells.length).toBe(9)
 
     await performWin()
@@ -79,8 +79,20 @@ describe('game board', () => {
     }
 
     await userEvent.click(screen.getByText(/go deeper/i))
-    // 8 cells at top level, 9 in a nested board
-    expect(screen.getAllByRole('button').length).toBe(8 + 9)
+    // 9 cells, each containing 9 cells
+    expect(screen.getAllByRole('button').length).toBe(9 ** 2)
+
+    cells = screen.getAllByRole('button')
+    let emptyCount = 0
+    let filledCount = 0
+    for (const cell of cells) {
+      if (cell.textContent === '') emptyCount++
+      else filledCount++
+    }
+
+    // 5 cells are filled by performWin()
+    expect(emptyCount).toBe((9 * 9) - 5)
+    expect(filledCount).toBe(5)
   })
 
   it('clears the board when going deeper from a draw', async () => {
@@ -95,9 +107,9 @@ describe('game board', () => {
     }
 
     await userEvent.click(screen.getByText(/go deeper/i))
-    // 8 cells at top level, 9 in a nested board
+    // 9 cells, each containing 9 cells
     cells = screen.getAllByRole('button')
-    expect(screen.getAllByRole('button').length).toBe(8 + 9)
+    expect(screen.getAllByRole('button').length).toBe(9 ** 2)
 
     for (const cell of cells) {
       // All cells should be empty

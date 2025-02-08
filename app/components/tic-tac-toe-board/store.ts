@@ -4,7 +4,7 @@ import { initialiseBoardState, setBoardStateWithPath } from './utils'
 import { assertIsBoardState, BoardState, CellState, FilledCellState, isBoardState } from './types'
 
 const clearBoard = (board: BoardState): BoardState => {
-  const newBoard: CellState[] = []
+  const newBoard: (CellState | BoardState)[] = []
   for (const i of board.keys()) {
     newBoard[i] = isBoardState(board[i]) ? clearBoard(board[i]) : null
   }
@@ -24,12 +24,12 @@ const useGameStore = create(combine(
       turn: turn === FilledCellState.X ? FilledCellState.O : FilledCellState.X,
     })),
     goDeeper: () => set(({ boardState }) => {
-      const initialState = initialiseBoardState()
-      // Embed the current board state into the centre (index 4) of a new board
+      // Embed the current board state into the centre (index 4) of a new board nested to the same depth
+      const emptyState = clearBoard(boardState)
       const newState = [
-        ...initialState.slice(0, 4),
+        ...Array.from(Array<BoardState>(4)).map(() => structuredClone(emptyState)),
         boardState,
-        ...initialState.slice(4 + 1),
+        ...Array.from(Array<BoardState>(4)).map(() => structuredClone(emptyState)),
       ]
 
       assertIsBoardState(newState)
@@ -46,7 +46,7 @@ if (import.meta.vitest) {
   const { it, expect, describe, beforeEach } = import.meta.vitest
 
   const X = FilledCellState.X
-  const O = FilledCellState.O // eslint-disable-line @typescript-eslint/no-unused-vars
+  const O = FilledCellState.O
   const _ = null
 
   describe('game store', () => {
@@ -71,9 +71,47 @@ if (import.meta.vitest) {
     it('can take turn in nested board', () => {
       useGameStore.setState({
         boardState: [
-          _, _, _,
-          _, _, _,
-          _, _, [
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
             _, _, _,
             _, _, _,
             _, _, _,
@@ -83,9 +121,47 @@ if (import.meta.vitest) {
       const takeTurn = useGameStore.getState().takeTurn
 
       const expectedBoardState: BoardState = [
-        _, _, _,
-        _, _, _,
-        _, _, [
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
           _, _, _,
           X, _, _,
           _, _, _,
@@ -95,6 +171,68 @@ if (import.meta.vitest) {
 
       expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
       expect(useGameStore.getState().turn).toBe(FilledCellState.O)
+    })
+
+    it('can go deeper', () => {
+      useGameStore.setState({
+        boardState: [
+          O, X, O,
+          O, X, X,
+          X, O, X,
+        ],
+      })
+      const goDeeper = useGameStore.getState().goDeeper
+
+      const expectedBoardState: BoardState = [
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          O, X, O,
+          O, X, X,
+          X, O, X,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+      ]
+      goDeeper()
+
+      expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
     })
 
     it('can clear the board', () => {
@@ -120,21 +258,97 @@ if (import.meta.vitest) {
     it('can clear a nested board', () => {
       useGameStore.setState({
         boardState: [
-          O, X, O,
-          O, X, X,
-          X, O, [
-            X, _, O,
-            O, X, _,
-            _, _, X,
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            O, X, O,
+            O, X, X,
+            X, O, X,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
+          ],
+          [
+            _, _, _,
+            _, _, _,
+            _, _, _,
           ],
         ],
       })
       const clearBoard = useGameStore.getState().clearBoard
 
       const expectedBoardState: BoardState = [
-        _, _, _,
-        _, _, _,
-        _, _, [
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
+          _, _, _,
+          _, _, _,
+          _, _, _,
+        ],
+        [
           _, _, _,
           _, _, _,
           _, _, _,
