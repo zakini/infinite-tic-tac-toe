@@ -17,7 +17,7 @@ export default function Board({ parentPath = [], disabled = null }: Props) {
   const winCells = win ? win.cells : null
 
   return (
-    <div className="grid aspect-square w-full grid-cols-3 gap-px bg-black">
+    <div className="grid aspect-square w-full grid-cols-3 gap-px bg-black p-px">
       {boardState.map((cell, i) => isBoardState(cell)
         ? (
             <Board
