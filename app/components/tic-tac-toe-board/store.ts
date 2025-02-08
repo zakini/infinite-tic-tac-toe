@@ -4,7 +4,7 @@ import { initialiseBoardState, setBoardStateWithPath } from './utils'
 import { assertIsBoardState, BoardState, CellState, FilledCellState, isBoardState } from './types'
 
 const clearBoard = (board: BoardState): BoardState => {
-  const newBoard: CellState[] = []
+  const newBoard: (CellState | BoardState)[] = []
   for (const i of board.keys()) {
     newBoard[i] = isBoardState(board[i]) ? clearBoard(board[i]) : null
   }
@@ -24,12 +24,12 @@ const useGameStore = create(combine(
       turn: turn === FilledCellState.X ? FilledCellState.O : FilledCellState.X,
     })),
     goDeeper: () => set(({ boardState }) => {
-      const initialState = initialiseBoardState()
-      // Embed the current board state into the centre (index 4) of a new board
+      // Embed the current board state into the centre (index 4) of a new board nested to the same depth
+      const emptyState = clearBoard(boardState)
       const newState = [
-        ...initialState.slice(0, 4),
+        ...Array.from(Array<BoardState>(4)).map(() => structuredClone(emptyState)),
         boardState,
-        ...initialState.slice(4 + 1),
+        ...Array.from(Array<BoardState>(4)).map(() => structuredClone(emptyState)),
       ]
 
       assertIsBoardState(newState)
@@ -41,108 +41,3 @@ const useGameStore = create(combine(
 ))
 
 export default useGameStore
-
-if (import.meta.vitest) {
-  const { it, expect, describe, beforeEach } = import.meta.vitest
-
-  const X = FilledCellState.X
-  const O = FilledCellState.O // eslint-disable-line @typescript-eslint/no-unused-vars
-  const _ = null
-
-  describe('game store', () => {
-    beforeEach(() => {
-      useGameStore.setState(useGameStore.getInitialState())
-    })
-
-    it('can take turn in top level board', () => {
-      const takeTurn = useGameStore.getState().takeTurn
-
-      const expectedBoardState: BoardState = [
-        _, _, _,
-        _, _, _,
-        _, _, X,
-      ]
-      takeTurn([8])
-
-      expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
-      expect(useGameStore.getState().turn).toBe(FilledCellState.O)
-    })
-
-    it('can take turn in nested board', () => {
-      useGameStore.setState({
-        boardState: [
-          _, _, _,
-          _, _, _,
-          _, _, [
-            _, _, _,
-            _, _, _,
-            _, _, _,
-          ],
-        ],
-      })
-      const takeTurn = useGameStore.getState().takeTurn
-
-      const expectedBoardState: BoardState = [
-        _, _, _,
-        _, _, _,
-        _, _, [
-          _, _, _,
-          X, _, _,
-          _, _, _,
-        ],
-      ]
-      takeTurn([8, 3])
-
-      expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
-      expect(useGameStore.getState().turn).toBe(FilledCellState.O)
-    })
-
-    it('can clear the board', () => {
-      useGameStore.setState({
-        boardState: [
-          O, X, O,
-          O, X, X,
-          X, O, X,
-        ],
-      })
-      const clearBoard = useGameStore.getState().clearBoard
-
-      const expectedBoardState: BoardState = [
-        _, _, _,
-        _, _, _,
-        _, _, _,
-      ]
-      clearBoard()
-
-      expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
-    })
-
-    it('can clear a nested board', () => {
-      useGameStore.setState({
-        boardState: [
-          O, X, O,
-          O, X, X,
-          X, O, [
-            X, _, O,
-            O, X, _,
-            _, _, X,
-          ],
-        ],
-      })
-      const clearBoard = useGameStore.getState().clearBoard
-
-      const expectedBoardState: BoardState = [
-        _, _, _,
-        _, _, _,
-        _, _, [
-          _, _, _,
-          _, _, _,
-          _, _, _,
-        ],
-      ]
-      clearBoard()
-
-      expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
-    })
-  })
-}

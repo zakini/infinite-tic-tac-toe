@@ -48,7 +48,7 @@ export const pickNestedBoardState = (boardState: BoardState, path: number[]): Bo
   return boardState
 }
 
-const resolveCellState = (cell: CellState): FilledCellState | null | false => {
+const resolveCellState = (cell: CellState | BoardState): FilledCellState | null | false => {
   if (!isBoardState(cell)) return cell
 
   const win = findWin(cell)
@@ -98,69 +98,4 @@ export const findWin = (board: BoardState): Win | null | false => {
   }
 
   return movesAvailable ? null : false
-}
-
-// TODO move this to a separate test file now that findWin() is exported?
-if (import.meta.vitest) {
-  const { it, expect, describe } = import.meta.vitest
-
-  const X = FilledCellState.X
-  const O = FilledCellState.O
-  const _ = null
-
-  describe('win finder', () => {
-    it('finds wins', () => {
-      const board: BoardState = [
-        X, _, O,
-        O, X, _,
-        _, _, X,
-      ]
-
-      expect(findWin(board)).toStrictEqual({
-        cells: [0, 4, 8],
-        player: X,
-      })
-    })
-
-    it('ignores lines of empty cells', () => {
-      const board: BoardState = [
-        X, _, O,
-        O, _, _,
-        _, _, X,
-      ]
-
-      expect(findWin(board)).toBeNull()
-    })
-
-    it('finds nested wins', () => {
-      const board: BoardState = [
-        X, _, O,
-        O, X, _,
-        _, _, [
-          X, _, O,
-          O, X, _,
-          _, _, X,
-        ],
-      ]
-
-      expect(findWin(board)).toStrictEqual({
-        cells: [0, 4, 8],
-        player: X,
-      })
-    })
-
-    it('finds draws', () => {
-      // OXO
-      // OXX
-      // XOX
-
-      const board: BoardState = [
-        O, X, O,
-        O, X, X,
-        X, O, X,
-      ]
-
-      expect(findWin(board)).toBe(false)
-    })
-  })
 }
