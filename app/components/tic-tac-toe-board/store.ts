@@ -1,7 +1,49 @@
 import { create } from 'zustand'
 import { combine } from 'zustand/middleware'
-import { initialiseBoardState, setBoardStateWithPath } from './utils'
+import { findWin, initialiseBoardState } from './utils'
 import { assertIsBoardState, BoardState, CellState, FilledCellState, isBoardState } from './types'
+
+const getBoardStateAtPath = (board: BoardState, path: number[]): BoardState => {
+  if (path.length <= 0) return board
+
+  const nestedBoard = board[path[0]]
+  assertIsBoardState(nestedBoard)
+  return getBoardStateAtPath(nestedBoard, path.slice(1))
+}
+
+const setBoardStateAtPath = (board: BoardState, path: number[], value: FilledCellState): BoardState => {
+  if (path.length <= 0) throw new Error('Path cannot be empty')
+
+  const i = path[0]
+  const rest = path.slice(1)
+  const target = board[i]
+
+  let newState
+  if (rest.length <= 0) {
+    if (target !== null) {
+      throw new Error(`Attempted to set state for non-empty cell: ${JSON.stringify(board)} | ${JSON.stringify(path)} | ${value}`)
+    }
+
+    newState = [
+      ...board.slice(0, i),
+      value,
+      ...board.slice(i + 1),
+    ]
+  } else {
+    if (!isBoardState(target)) {
+      throw new Error(`Attempted to set nested state for non-nested cell: ${JSON.stringify(board)} | ${JSON.stringify(path)} | ${value}`)
+    }
+
+    newState = [
+      ...board.slice(0, i),
+      setBoardStateAtPath(target, rest, value),
+      ...board.slice(i + 1),
+    ]
+  }
+
+  assertIsBoardState(newState)
+  return newState
+}
 
 const clearBoard = (board: BoardState): BoardState => {
   const newBoard: (CellState | BoardState)[] = []
@@ -13,16 +55,40 @@ const clearBoard = (board: BoardState): BoardState => {
   return newBoard
 }
 
+const turnValid = (path: number[], turnPath: number[]): boolean =>
+  turnPath.length === 0 || path.slice(-1) === turnPath
+
 const useGameStore = create(combine(
   {
     boardState: initialiseBoardState(),
     turn: FilledCellState.X,
+    turnPath: [] as number[],
   },
   set => ({
-    takeTurn: (path: number[]) => set(({ boardState, turn }) => ({
-      boardState: setBoardStateWithPath(boardState, path, turn),
-      turn: turn === FilledCellState.X ? FilledCellState.O : FilledCellState.X,
-    })),
+    takeTurn: (path: number[]) => set(({ boardState, turn, turnPath }) => {
+      if (!turnValid(path, turnPath)) {
+        throw new Error(
+          `Attempted to take turn in invalid cell: turn: ${turn} | path: ${JSON.stringify(path)} | turn path: ${JSON.stringify(turnPath)}`,
+        )
+      }
+
+      const newBoardState = setBoardStateAtPath(boardState, path, turn)
+
+      let newTurnPath: number[] = []
+      if (path.length > 1) {
+        newTurnPath = [...path.slice(0, -2), path[path.length - 1]]
+
+        const targetBoard = getBoardStateAtPath(newBoardState, newTurnPath)
+        // Target board is already complete, next player's move can be anywhere
+        if (findWin(targetBoard) !== null) newTurnPath = []
+      }
+
+      return {
+        boardState: newBoardState,
+        turn: turn === FilledCellState.X ? FilledCellState.O : FilledCellState.X,
+        turnPath: newTurnPath,
+      }
+    }),
     goDeeper: () => set(({ boardState }) => {
       // Embed the current board state into the centre (index 4) of a new board nested to the same depth
       const emptyState = clearBoard(boardState)
@@ -34,7 +100,10 @@ const useGameStore = create(combine(
 
       assertIsBoardState(newState)
 
-      return { boardState: newState }
+      return {
+        boardState: newState,
+        turnPath: [],
+      }
     }),
     clearBoard: () => set(({ boardState }) => ({ boardState: clearBoard(boardState) })),
   }),

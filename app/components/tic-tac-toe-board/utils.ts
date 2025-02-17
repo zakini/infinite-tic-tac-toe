@@ -1,40 +1,6 @@
-import { assertIsBoardState, BoardState, CellState, FilledCellState, isBoardState, Win } from './types'
+import { BoardState, CellState, FilledCellState, isBoardState, Win } from './types'
 
 export const initialiseBoardState = (): BoardState => Array(9).fill(null) as BoardState
-
-export const setBoardStateWithPath = (b: BoardState, path: number[], v: FilledCellState): BoardState => {
-  if (path.length <= 0) throw new Error('Path cannot be empty')
-
-  const i = path[0]
-  const rest = path.slice(1)
-  const target = b[i]
-
-  let newState
-  if (rest.length <= 0) {
-    if (target !== null) {
-      throw new Error(`Attempted to set state for non-empty cell: ${JSON.stringify(b)} | ${JSON.stringify(path)} | ${v}`)
-    }
-
-    newState = [
-      ...b.slice(0, i),
-      v,
-      ...b.slice(i + 1),
-    ]
-  } else {
-    if (!isBoardState(target)) {
-      throw new Error(`Attempted to set nested state for non-nested cell: ${JSON.stringify(b)} | ${JSON.stringify(path)} | ${v}`)
-    }
-
-    newState = [
-      ...b.slice(0, i),
-      setBoardStateWithPath(target, rest, v),
-      ...b.slice(i + 1),
-    ]
-  }
-
-  assertIsBoardState(newState)
-  return newState
-}
 
 export const pickNestedBoardState = (boardState: BoardState, path: number[]): BoardState => {
   for (const i of path) {
