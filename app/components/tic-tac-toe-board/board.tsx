@@ -1,6 +1,6 @@
 import { useShallow } from 'zustand/shallow'
 import useGameStore from './store'
-import { findWin, pickNestedBoardState } from './utils'
+import { findWin, pickNestedBoardState, turnValid } from './utils'
 import { isBoardState } from './types'
 
 type Props = {
@@ -9,8 +9,8 @@ type Props = {
 }
 
 export default function Board({ parentPath = [], disabled = null }: Props) {
-  const [fullBoardState, takeTurn] = useGameStore(useShallow(
-    state => [state.boardState, state.takeTurn],
+  const [fullBoardState, takeTurn, turnPath] = useGameStore(useShallow(
+    state => [state.boardState, state.takeTurn, state.turnPath],
   ))
   const boardState = pickNestedBoardState(fullBoardState, parentPath)
   const win = findWin(boardState)
@@ -23,14 +23,14 @@ export default function Board({ parentPath = [], disabled = null }: Props) {
             <Board
               key={i}
               parentPath={[...parentPath, i]}
-              disabled={disabled || win !== null}
+              disabled={disabled || win !== null || !turnValid([...parentPath, i], turnPath)}
             />
           )
         : (
             <button
               key={i}
-              className={`relative aspect-square ${winCells?.includes(i) ? 'bg-green-500' : 'bg-white'}`}
-              disabled={disabled || cell !== null || win !== null}
+              className={`relative aspect-square ${winCells?.includes(i) ? 'bg-green-500' : 'bg-white disabled:bg-gray-400'}`}
+              disabled={disabled || cell !== null}
               onClick={() => {
                 takeTurn([...parentPath, i])
               }}

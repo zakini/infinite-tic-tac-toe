@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { combine } from 'zustand/middleware'
-import { findWin, initialiseBoardState } from './utils'
+import { findWin, initialiseBoardState, turnValid } from './utils'
 import { assertIsBoardState, BoardState, CellState, FilledCellState, isBoardState } from './types'
 
 const getBoardStateAtPath = (board: BoardState, path: number[]): BoardState => {
@@ -54,9 +54,6 @@ const clearBoard = (board: BoardState): BoardState => {
   assertIsBoardState(newBoard)
   return newBoard
 }
-
-const turnValid = (path: number[], turnPath: number[]): boolean =>
-  turnPath.length === 0 || path.slice(-1) === turnPath
 
 const useGameStore = create(combine(
   {

@@ -116,4 +116,22 @@ describe('game board', () => {
       expect(cell.textContent).toBe('')
     }
   })
+
+  it('doesn\'t allow players to click inactive sub-boards', async () => {
+    render(<TicTacToeBoard />)
+
+    await performWin()
+    await userEvent.click(screen.getByText(/go deeper/i))
+
+    const cells = screen.getAllByRole('button')
+    // Click middle left cell of top left board
+    await userEvent.click(cells[9 * 0 + 3])
+    expect(cells[9 * 0 + 3]).toHaveTextContent('O')
+    // Attempt to click a cell in the top right board
+    await userEvent.click(cells[9 * 2 + 7])
+    expect(cells[9 * 2 + 7].textContent).toBe('')
+    // Click a cell in the middle left board
+    await userEvent.click(cells[9 * 3 + 1])
+    expect(cells[9 * 3 + 1]).toHaveTextContent('X')
+  })
 })

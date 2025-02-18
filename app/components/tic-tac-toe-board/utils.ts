@@ -65,3 +65,8 @@ export const findWin = (board: BoardState): Win | null | false => {
 
   return movesAvailable ? null : false
 }
+
+export const turnValid = (path: number[], turnPath: number[]): boolean =>
+  path.length <= 0
+  || turnPath.length <= 0
+  || (path[0] === turnPath[0] && turnValid(path.slice(1), turnPath.slice(1)))
