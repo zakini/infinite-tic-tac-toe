@@ -23,14 +23,14 @@ export default function Board({ parentPath = [], disabled = null }: Props) {
             <Board
               key={i}
               parentPath={[...parentPath, i]}
-              disabled={disabled || win !== null || !turnValid([...parentPath, i], turnPath)}
+              disabled={disabled || !turnValid([...parentPath, i], turnPath)}
             />
           )
         : (
             <button
               key={i}
               className={`relative aspect-square ${winCells?.includes(i) ? 'bg-green-500' : 'bg-white disabled:bg-gray-400'}`}
-              disabled={disabled || cell !== null}
+              disabled={disabled || win !== null || cell !== null}
               onClick={() => {
                 takeTurn([...parentPath, i])
               }}
