@@ -117,6 +117,17 @@ describe('game board', () => {
     }
   })
 
+  it('doesn\'t allow players to click cells in won sub-boards', async () => {
+    render(<TicTacToeBoard />)
+    await performWin()
+    await userEvent.click(screen.getByText(/go deeper/i))
+
+    const cells = screen.getAllByRole('button')
+    // Click the middle right cell of the middle board (this board contains a win with empty cells)
+    await userEvent.click(cells[9 * 4 + 5])
+    expect(cells[9 * 4 + 5].textContent).toBe('')
+  })
+
   it('doesn\'t allow players to click inactive sub-boards', async () => {
     render(<TicTacToeBoard />)
 
