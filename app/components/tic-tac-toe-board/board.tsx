@@ -17,7 +17,10 @@ export default function Board({ parentPath = [], disabled = null }: Props) {
   const winCells = win ? win.cells : null
 
   return (
-    <div className="grid aspect-square w-full grid-cols-3 gap-px bg-black p-px">
+    <div className="relative grid aspect-square w-full grid-cols-3 gap-px bg-black p-px">
+      {win && parentPath.length > 0 && (
+        <div className="absolute inset-0 z-10 m-px bg-green-500 opacity-80">{win.player}</div>
+      )}
       {boardState.map((cell, i) => isBoardState(cell)
         ? (
             <Board
