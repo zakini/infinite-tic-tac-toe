@@ -80,19 +80,19 @@ describe('game board', () => {
 
     await userEvent.click(screen.getByText(/go deeper/i))
     // 9 cells, each containing 9 cells
-    expect(screen.getAllByRole('button').length).toBe(9 ** 2)
-
     cells = screen.getAllByRole('button')
-    let emptyCount = 0
-    let filledCount = 0
-    for (const cell of cells) {
-      if (cell.textContent === '') emptyCount++
-      else filledCount++
-    }
+    expect(cells.length).toBe(9 ** 2)
 
-    // 5 cells are filled by performWin()
-    expect(emptyCount).toBe((9 * 9) - 5)
-    expect(filledCount).toBe(5)
+    for (let i = 0; i < cells.length; i++) {
+      // Middle board contains the cells from the winning board
+      if (Math.floor(i / 9) === 4) {
+        // The first 5 cells are filled by performWin()
+        if (i % 9 <= 4) expect(cells[i].textContent).not.toBe('')
+        else expect(cells[i].textContent).toBe('')
+      } else {
+        expect(cells[i].textContent).toBe('')
+      }
+    }
   })
 
   it('clears the board when going deeper from a draw', async () => {
