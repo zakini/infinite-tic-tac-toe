@@ -80,19 +80,20 @@ describe('game board', () => {
 
     await userEvent.click(screen.getByText(/go deeper/i))
     // 9 cells, each containing 9 cells
-    expect(screen.getAllByRole('button').length).toBe(9 ** 2)
-
     cells = screen.getAllByRole('button')
-    let emptyCount = 0
-    let filledCount = 0
-    for (const cell of cells) {
-      if (cell.textContent === '') emptyCount++
-      else filledCount++
-    }
+    expect(cells.length).toBe(9 ** 2)
 
-    // 5 cells are filled by performWin()
-    expect(emptyCount).toBe((9 * 9) - 5)
-    expect(filledCount).toBe(5)
+    for (let i = 0; i < cells.length; i++) {
+      // Top right board contains the cells from the winning board, since the last move made by
+      // performWin() is in the top right
+      if (Math.floor(i / 9) === 2) {
+        // The first 5 cells are filled by performWin()
+        if (i % 9 <= 4) expect(cells[i].textContent).not.toBe('')
+        else expect(cells[i].textContent).toBe('')
+      } else {
+        expect(cells[i].textContent).toBe('')
+      }
+    }
   })
 
   it('clears the board when going deeper from a draw', async () => {
@@ -123,9 +124,10 @@ describe('game board', () => {
     await userEvent.click(screen.getByText(/go deeper/i))
 
     const cells = screen.getAllByRole('button')
-    // Click the middle right cell of the middle board (this board contains a win with empty cells)
-    await userEvent.click(cells[9 * 4 + 5])
-    expect(cells[9 * 4 + 5].textContent).toBe('')
+    // Click the middle right cell of the top right board (this board contains a
+    // win with empty cells)
+    await userEvent.click(cells[9 * 2 + 5])
+    expect(cells[9 * 2 + 5].textContent).toBe('')
   })
 
   it('doesn\'t allow players to click inactive sub-boards', async () => {
@@ -138,9 +140,9 @@ describe('game board', () => {
     // Click middle left cell of top left board
     await userEvent.click(cells[9 * 0 + 3])
     expect(cells[9 * 0 + 3]).toHaveTextContent('O')
-    // Attempt to click a cell in the top right board
-    await userEvent.click(cells[9 * 2 + 7])
-    expect(cells[9 * 2 + 7].textContent).toBe('')
+    // Attempt to click a cell in the bottom right board
+    await userEvent.click(cells[9 * 8 + 7])
+    expect(cells[9 * 8 + 7].textContent).toBe('')
     // Click a cell in the middle left board
     await userEvent.click(cells[9 * 3 + 1])
     expect(cells[9 * 3 + 1]).toHaveTextContent('X')

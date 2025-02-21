@@ -58,22 +58,23 @@ const clearBoard = (board: BoardState): BoardState => {
 const useGameStore = create(combine(
   {
     boardState: initialiseBoardState(),
-    turn: FilledCellState.X,
+    nextPlayer: FilledCellState.X,
     turnPath: [] as number[],
+    previousTurn: null as [number, ...number[]] | null,
   },
   set => ({
-    takeTurn: (path: number[]) => set(({ boardState, turn, turnPath }) => {
-      if (!turnValid(path, turnPath)) {
+    takeTurn: (turn: [number, ...number[]]) => set(({ boardState, nextPlayer, turnPath }) => {
+      if (!turnValid(turn, turnPath)) {
         throw new Error(
-          `Attempted to take turn in invalid cell: turn: ${turn} | path: ${JSON.stringify(path)} | turn path: ${JSON.stringify(turnPath)}`,
+          `Attempted to take turn in invalid cell: next player: ${nextPlayer} | turn: ${JSON.stringify(turn)} | turn path: ${JSON.stringify(turnPath)}`,
         )
       }
 
-      const newBoardState = setBoardStateAtPath(boardState, path, turn)
+      const newBoardState = setBoardStateAtPath(boardState, turn, nextPlayer)
 
       let newTurnPath: number[] = []
-      if (path.length > 1) {
-        newTurnPath = [...path.slice(0, -2), path[path.length - 1]]
+      if (turn.length > 1) {
+        newTurnPath = [...turn.slice(0, -2), turn[turn.length - 1]]
 
         const targetBoard = getBoardStateAtPath(newBoardState, newTurnPath)
         // Target board is already complete, next player's move can be anywhere
@@ -82,17 +83,23 @@ const useGameStore = create(combine(
 
       return {
         boardState: newBoardState,
-        turn: turn === FilledCellState.X ? FilledCellState.O : FilledCellState.X,
+        nextPlayer: nextPlayer === FilledCellState.X ? FilledCellState.O : FilledCellState.X,
         turnPath: newTurnPath,
+        previousTurn: turn,
       }
     }),
-    goDeeper: () => set(({ boardState }) => {
-      // Embed the current board state into the centre (index 4) of a new board nested to the same depth
+    goDeeper: () => set(({ boardState, previousTurn }) => {
+      // Embed the current board state into same cell as the last turn of a new board nested to the
+      // same depth
+      const nestInto = previousTurn === null
+        // This should never happen, but just in case, nest into the middle board
+        ? 4
+        : previousTurn[previousTurn?.length - 1]
       const emptyState = clearBoard(boardState)
       const newState = [
-        ...Array.from(Array<BoardState>(4)).map(() => structuredClone(emptyState)),
+        ...Array.from(Array<BoardState>(nestInto)).map(() => structuredClone(emptyState)),
         boardState,
-        ...Array.from(Array<BoardState>(4)).map(() => structuredClone(emptyState)),
+        ...Array.from(Array<BoardState>(9 - 1 - nestInto)).map(() => structuredClone(emptyState)),
       ]
 
       assertIsBoardState(newState)
