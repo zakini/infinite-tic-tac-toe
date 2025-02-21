@@ -62,18 +62,18 @@ const useGameStore = create(combine(
     turnPath: [] as number[],
   },
   set => ({
-    takeTurn: (path: number[]) => set(({ boardState, nextPlayer, turnPath }) => {
-      if (!turnValid(path, turnPath)) {
+    takeTurn: (turn: number[]) => set(({ boardState, nextPlayer, turnPath }) => {
+      if (!turnValid(turn, turnPath)) {
         throw new Error(
-          `Attempted to take turn in invalid cell: next player: ${nextPlayer} | path: ${JSON.stringify(path)} | turn path: ${JSON.stringify(turnPath)}`,
+          `Attempted to take turn in invalid cell: next player: ${nextPlayer} | turn: ${JSON.stringify(turn)} | turn path: ${JSON.stringify(turnPath)}`,
         )
       }
 
-      const newBoardState = setBoardStateAtPath(boardState, path, nextPlayer)
+      const newBoardState = setBoardStateAtPath(boardState, turn, nextPlayer)
 
       let newTurnPath: number[] = []
-      if (path.length > 1) {
-        newTurnPath = [...path.slice(0, -2), path[path.length - 1]]
+      if (turn.length > 1) {
+        newTurnPath = [...turn.slice(0, -2), turn[turn.length - 1]]
 
         const targetBoard = getBoardStateAtPath(newBoardState, newTurnPath)
         // Target board is already complete, next player's move can be anywhere
