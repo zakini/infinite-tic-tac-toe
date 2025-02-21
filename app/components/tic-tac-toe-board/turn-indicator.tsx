@@ -1,9 +1,9 @@
 import useGameStore from './store'
 
 export default function TurnIndicator() {
-  const turn = useGameStore(state => state.turn)
+  const nextPlayer = useGameStore(state => state.nextPlayer)
 
   return (
-    <div>Current player: {turn}</div>
+    <div>Current player: {nextPlayer}</div>
   )
 }

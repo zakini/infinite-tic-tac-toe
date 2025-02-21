@@ -58,18 +58,18 @@ const clearBoard = (board: BoardState): BoardState => {
 const useGameStore = create(combine(
   {
     boardState: initialiseBoardState(),
-    turn: FilledCellState.X,
+    nextPlayer: FilledCellState.X,
     turnPath: [] as number[],
   },
   set => ({
-    takeTurn: (path: number[]) => set(({ boardState, turn, turnPath }) => {
+    takeTurn: (path: number[]) => set(({ boardState, nextPlayer, turnPath }) => {
       if (!turnValid(path, turnPath)) {
         throw new Error(
-          `Attempted to take turn in invalid cell: turn: ${turn} | path: ${JSON.stringify(path)} | turn path: ${JSON.stringify(turnPath)}`,
+          `Attempted to take turn in invalid cell: next player: ${nextPlayer} | path: ${JSON.stringify(path)} | turn path: ${JSON.stringify(turnPath)}`,
         )
       }
 
-      const newBoardState = setBoardStateAtPath(boardState, path, turn)
+      const newBoardState = setBoardStateAtPath(boardState, path, nextPlayer)
 
       let newTurnPath: number[] = []
       if (path.length > 1) {
@@ -82,7 +82,7 @@ const useGameStore = create(combine(
 
       return {
         boardState: newBoardState,
-        turn: turn === FilledCellState.X ? FilledCellState.O : FilledCellState.X,
+        nextPlayer: nextPlayer === FilledCellState.X ? FilledCellState.O : FilledCellState.X,
         turnPath: newTurnPath,
       }
     }),

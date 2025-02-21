@@ -40,7 +40,7 @@ describe('game store', () => {
     takeTurn([8])
 
     expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
-    expect(useGameStore.getState().turn).toBe(FilledCellState.O)
+    expect(useGameStore.getState().nextPlayer).toBe(FilledCellState.O)
     expect(useGameStore.getState().turnPath).toStrictEqual([])
   })
 
@@ -66,7 +66,7 @@ describe('game store', () => {
     takeTurn([8, 3])
 
     expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
-    expect(useGameStore.getState().turn).toBe(FilledCellState.O)
+    expect(useGameStore.getState().nextPlayer).toBe(FilledCellState.O)
     expect(useGameStore.getState().turnPath).toStrictEqual([3])
   })
 
@@ -96,7 +96,7 @@ describe('game store', () => {
     takeTurn([8, 8, 4])
 
     expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
-    expect(useGameStore.getState().turn).toBe(FilledCellState.O)
+    expect(useGameStore.getState().nextPlayer).toBe(FilledCellState.O)
     expect(useGameStore.getState().turnPath).toStrictEqual([8, 4])
   })
 
@@ -119,7 +119,7 @@ describe('game store', () => {
     expect(() => takeTurn([8, 8, 4])).toThrowError()
 
     expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
-    expect(useGameStore.getState().turn).toBe(FilledCellState.X)
+    expect(useGameStore.getState().nextPlayer).toBe(FilledCellState.X)
     expect(useGameStore.getState().turnPath).toStrictEqual([8, 3])
   })
 
@@ -157,7 +157,7 @@ describe('game store', () => {
     takeTurn([8, 8, 8])
 
     expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
-    expect(useGameStore.getState().turn).toBe(FilledCellState.O)
+    expect(useGameStore.getState().nextPlayer).toBe(FilledCellState.O)
     expect(useGameStore.getState().turnPath).toStrictEqual([])
   })
 
