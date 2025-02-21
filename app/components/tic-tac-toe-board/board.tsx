@@ -35,7 +35,9 @@ export default function Board({ parentPath = [], disabled = null }: Props) {
               className={`relative aspect-square ${winCells?.includes(i) ? 'bg-green-500' : 'bg-white disabled:bg-gray-400'}`}
               disabled={disabled || win !== null || cell !== null}
               onClick={() => {
-                takeTurn([...parentPath, i])
+                // This is a bug in Typescript. Use 'as' to override
+                // See: https://github.com/microsoft/TypeScript/issues/60463
+                takeTurn([...parentPath, i] as unknown as [number, ...number[]])
               }}
             >
               <span className="absolute">{cell}</span>

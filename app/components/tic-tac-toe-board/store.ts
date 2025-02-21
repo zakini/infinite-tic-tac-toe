@@ -60,9 +60,10 @@ const useGameStore = create(combine(
     boardState: initialiseBoardState(),
     nextPlayer: FilledCellState.X,
     turnPath: [] as number[],
+    previousTurn: null as [number, ...number[]] | null,
   },
   set => ({
-    takeTurn: (turn: number[]) => set(({ boardState, nextPlayer, turnPath }) => {
+    takeTurn: (turn: [number, ...number[]]) => set(({ boardState, nextPlayer, turnPath }) => {
       if (!turnValid(turn, turnPath)) {
         throw new Error(
           `Attempted to take turn in invalid cell: next player: ${nextPlayer} | turn: ${JSON.stringify(turn)} | turn path: ${JSON.stringify(turnPath)}`,
@@ -84,15 +85,21 @@ const useGameStore = create(combine(
         boardState: newBoardState,
         nextPlayer: nextPlayer === FilledCellState.X ? FilledCellState.O : FilledCellState.X,
         turnPath: newTurnPath,
+        previousTurn: turn,
       }
     }),
-    goDeeper: () => set(({ boardState }) => {
-      // Embed the current board state into the centre (index 4) of a new board nested to the same depth
+    goDeeper: () => set(({ boardState, previousTurn }) => {
+      // Embed the current board state into same cell as the last turn of a new board nested to the
+      // same depth
+      const nestInto = previousTurn === null
+        // This should never happen, but just in case, nest into the middle board
+        ? 4
+        : previousTurn[previousTurn?.length - 1]
       const emptyState = clearBoard(boardState)
       const newState = [
-        ...Array.from(Array<BoardState>(4)).map(() => structuredClone(emptyState)),
+        ...Array.from(Array<BoardState>(nestInto)).map(() => structuredClone(emptyState)),
         boardState,
-        ...Array.from(Array<BoardState>(4)).map(() => structuredClone(emptyState)),
+        ...Array.from(Array<BoardState>(9 - 1 - nestInto)).map(() => structuredClone(emptyState)),
       ]
 
       assertIsBoardState(newState)
