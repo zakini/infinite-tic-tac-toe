@@ -1,6 +1,6 @@
-import { BoardState, CellState, FilledCellState, isBoardState, Win } from './types'
+import { BoardState, CellState, FilledCellState, isBoardState, SingleLevelBoardState, Win } from './types'
 
-export const initialiseBoardState = (): BoardState => Array(9).fill(null) as BoardState
+export const initialiseBoardState = (): SingleLevelBoardState => Array(9).fill(null) as SingleLevelBoardState
 
 export const pickNestedBoardState = (boardState: BoardState, path: number[]): BoardState => {
   for (const i of path) {
