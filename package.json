@@ -10,7 +10,8 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "types": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest",
+    "generate-states": "tsx ./tools/generate-possible-board-states.ts"
   },
   "dependencies": {
     "next": "15.1.5",
@@ -39,6 +40,7 @@
     "jsdom": "^26.0.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.19.3",
     "typescript": "^5",
     "typescript-eslint": "^8.21.0",
     "vite-tsconfig-paths": "^5.1.4",

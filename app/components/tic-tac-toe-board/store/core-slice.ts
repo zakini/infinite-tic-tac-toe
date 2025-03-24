@@ -1,7 +1,6 @@
-import { create } from 'zustand'
 import { combine } from 'zustand/middleware'
-import { findWin, initialiseBoardState, turnValid } from './utils'
-import { assertIsBoardState, BoardState, CellState, FilledCellState, isBoardState } from './types'
+import { findWin, initialiseBoardState, turnValid } from '../utils'
+import { assertIsBoardState, BoardState, CellState, FilledCellState, isBoardState } from '../types'
 
 const getBoardStateAtPath = (board: BoardState, path: number[]): BoardState => {
   if (path.length <= 0) return board
@@ -55,9 +54,9 @@ const clearBoard = (board: BoardState): BoardState => {
   return newBoard
 }
 
-const useGameStore = create(combine(
+const createCoreSlice = combine(
   {
-    boardState: initialiseBoardState(),
+    boardState: initialiseBoardState() as BoardState,
     nextPlayer: FilledCellState.X,
     turnPath: [] as number[],
     previousTurn: null as [number, ...number[]] | null,
@@ -111,6 +110,7 @@ const useGameStore = create(combine(
     }),
     clearBoard: () => set(({ boardState }) => ({ boardState: clearBoard(boardState) })),
   }),
-))
+)
 
-export default useGameStore
+export default createCoreSlice
+export type CoreSlice = ReturnType<typeof createCoreSlice>
