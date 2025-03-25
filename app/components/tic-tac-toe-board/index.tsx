@@ -11,11 +11,13 @@ const DevTools = process.env.NODE_ENV === 'development'
 
 export default function TicTacToeBoard() {
   return (
-    <div className="relative">
-      <TurnIndicator />
-      <Board />
-      <Results className="absolute inset-0" />
+    <>
+      <div className="relative">
+        <TurnIndicator />
+        <Board />
+        <Results className="absolute inset-0 z-10" />
+      </div>
       <DevTools />
-    </div>
+    </>
   )
 }
