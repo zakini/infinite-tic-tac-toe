@@ -61,7 +61,7 @@ const createCoreSlice = combine(
     turnPath: [] as number[],
     previousTurn: null as [number, ...number[]] | null,
   },
-  set => ({
+  (set, _, store) => ({
     takeTurn: (turn: [number, ...number[]]) => set(({ boardState, nextPlayer, turnPath }) => {
       if (!turnValid(turn, turnPath)) {
         throw new Error(
@@ -112,6 +112,7 @@ const createCoreSlice = combine(
         turnPath: [],
       }
     }),
+    startNewGame: () => set(store.getInitialState()),
   }),
 )
 

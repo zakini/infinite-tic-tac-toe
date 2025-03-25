@@ -9,8 +9,8 @@ type Props = {
 
 export default function Results({ className = 'relative' }: Props) {
   const [conceded, setConceded] = useState(false)
-  const [boardState, goDeeper] = useGameStore(useShallow(state => [
-    state.boardState, state.goDeeper,
+  const [boardState, goDeeper, startNewGame] = useGameStore(useShallow(state => [
+    state.boardState, state.goDeeper, state.startNewGame,
   ]))
   const win = findWin(boardState)
   const draw = win === false
@@ -25,23 +25,34 @@ export default function Results({ className = 'relative' }: Props) {
         <div id="results-title" className="bg-white">
           Game Over: {draw ? 'no one' : win.player} wins
         </div>
-        {!conceded && (
-          <div className="flex gap-2">
-            <button
-              className="bg-white"
-              onClick={() => setConceded(true)}
-            >
-              Concede
-            </button>
+        <div className="flex gap-2">
+          {conceded
+            ? (
+                <button
+                  className="bg-white"
+                  onClick={() => startNewGame()}
+                >
+                  Start new game
+                </button>
+              )
+            : (
+                <>
+                  <button
+                    className="bg-white"
+                    onClick={() => setConceded(true)}
+                  >
+                    Concede
+                  </button>
 
-            <button
-              className="bg-white"
-              onClick={() => goDeeper()}
-            >
-              Go Deeper
-            </button>
-          </div>
-        )}
+                  <button
+                    className="bg-white"
+                    onClick={() => goDeeper()}
+                  >
+                    Go Deeper
+                  </button>
+                </>
+              )}
+        </div>
       </div>
     </div>
   )
