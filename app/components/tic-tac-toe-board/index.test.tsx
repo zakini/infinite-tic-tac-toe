@@ -54,13 +54,22 @@ describe('game board', () => {
     expect(screen.getByText(/go deeper/i).closest('button')).toBeInTheDocument()
   })
 
-  it('is non-interactive when conceded', async () => {
+  it('can concede and start a new game', async () => {
     render(<TicTacToeBoard />)
     await performWin()
 
     await userEvent.click(screen.getByText(/concede/i))
+    await userEvent.click(screen.getByText(/new game/i))
 
-    expect(screen.getByRole('dialog')).not.toContainHTML('button')
+    const cells = screen.getAllByRole('button')
+    expect(cells.length).toBe(9)
+
+    for (const cell of cells) {
+      expect(cell.textContent).toBe('')
+    }
+
+    // X always goes first in a game
+    expect(screen.getByText(/current player/i).textContent).toContain('X')
   })
 
   it('can go deeper', async () => {
@@ -94,6 +103,9 @@ describe('game board', () => {
         expect(cells[i].textContent).toBe('')
       }
     }
+
+    // performWin() makes X win, O should be next to play
+    expect(screen.getByText(/current player/i).textContent).toContain('O')
   })
 
   it('clears the board when going deeper from a draw', async () => {

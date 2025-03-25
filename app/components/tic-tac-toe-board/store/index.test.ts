@@ -12,17 +12,17 @@ const _1b: BoardState = [
   _, _, _,
   _, _, _,
 ] as const
-/** Drawn 1 level board */
-const d1b: BoardState = [
-  O, X, O,
-  O, X, X,
-  X, O, X,
-] as const
 /** All blank 2 level board */
 const _2b: BoardState = [
   _1b, _1b, _1b,
   _1b, _1b, _1b,
   _1b, _1b, _1b,
+] as const
+/** 1 level board won by X */
+const x1b: BoardState = [
+  X, X, X,
+  O, O, _,
+  _, _, _,
 ] as const
 
 describe('game store', () => {
@@ -164,51 +164,19 @@ describe('game store', () => {
 
   it('can go deeper', () => {
     useGameStore.setState({
-      boardState: d1b,
+      boardState: x1b,
     })
     const goDeeper = useGameStore.getState().goDeeper
 
     const expectedBoardState: BoardState = [
       _1b, _1b, _1b,
-      _1b, d1b, _1b,
+      _1b, x1b, _1b,
       _1b, _1b, _1b,
     ]
     goDeeper()
 
     expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
     expect(useGameStore.getState().turnPath).toStrictEqual([])
-  })
-
-  it('can clear the board', () => {
-    useGameStore.setState({
-      boardState: d1b,
-    })
-    const clearBoard = useGameStore.getState().clearBoard
-
-    const expectedBoardState = _1b
-    clearBoard()
-
-    expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
-  })
-
-  it('can clear a nested board', () => {
-    useGameStore.setState({
-      boardState: [
-        _1b, _1b, _1b,
-        _1b, d1b, _1b,
-        _1b, _1b, _1b,
-      ],
-    })
-    const clearBoard = useGameStore.getState().clearBoard
-
-    const expectedBoardState: BoardState = [
-      _1b, _1b, _1b,
-      _1b, _1b, _1b,
-      _1b, _1b, _1b,
-    ]
-    clearBoard()
-
-    expect(useGameStore.getState().boardState).toStrictEqual(expectedBoardState)
   })
 })
 
