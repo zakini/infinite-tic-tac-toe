@@ -95,11 +95,15 @@ const createCoreSlice = combine(
         ? 4
         : previousTurn[previousTurn?.length - 1]
       const emptyState = clearBoard(boardState)
-      const newState = [
-        ...Array.from(Array<BoardState>(nestInto)).map(() => structuredClone(emptyState)),
-        boardState,
-        ...Array.from(Array<BoardState>(9 - 1 - nestInto)).map(() => structuredClone(emptyState)),
-      ]
+      const newState = findWin(boardState) === false
+        // Game was drawn, clear the board
+        ? Array.from(Array<BoardState>(9)).map(() => structuredClone(emptyState))
+        // Game was won, nested it into a deeper board
+        : [
+            ...Array.from(Array<BoardState>(nestInto)).map(() => structuredClone(emptyState)),
+            boardState,
+            ...Array.from(Array<BoardState>(9 - 1 - nestInto)).map(() => structuredClone(emptyState)),
+          ]
 
       assertIsBoardState(newState)
 
@@ -108,7 +112,6 @@ const createCoreSlice = combine(
         turnPath: [],
       }
     }),
-    clearBoard: () => set(({ boardState }) => ({ boardState: clearBoard(boardState) })),
   }),
 )
 

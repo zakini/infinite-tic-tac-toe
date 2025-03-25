@@ -9,8 +9,8 @@ type Props = {
 
 export default function Results({ className = 'relative' }: Props) {
   const [conceded, setConceded] = useState(false)
-  const [boardState, goDeeper, clearBoard] = useGameStore(useShallow(state => [
-    state.boardState, state.goDeeper, state.clearBoard,
+  const [boardState, goDeeper] = useGameStore(useShallow(state => [
+    state.boardState, state.goDeeper,
   ]))
   const win = findWin(boardState)
   const draw = win === false
@@ -36,10 +36,7 @@ export default function Results({ className = 'relative' }: Props) {
 
             <button
               className="bg-white"
-              onClick={() => {
-                goDeeper()
-                if (draw) clearBoard()
-              }}
+              onClick={() => goDeeper()}
             >
               Go Deeper
             </button>
