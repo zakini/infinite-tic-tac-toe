@@ -5,7 +5,6 @@ import stylistic from '@stylistic/eslint-plugin'
 import { Linter } from 'eslint'
 import tseslint from 'typescript-eslint'
 import { FlatConfig } from '@typescript-eslint/utils/ts-eslint'
-import tailwind from 'eslint-plugin-tailwindcss'
 
 // eslint configs are kinda weirdly structured
 // see: https://github.com/typescript-eslint/typescript-eslint/issues/8613
@@ -46,7 +45,6 @@ const eslintConfig = [
 
   // code style
   stylistic.configs['recommended-flat'],
-  ...tailwind.configs['flat/recommended'],
 
   // the bikeshed
   {
