@@ -15,7 +15,7 @@ export default function TicTacToeBoard() {
       <div className="relative">
         <TurnIndicator />
         <Board />
-        <Results className="absolute inset-0" />
+        <Results className="absolute inset-0 z-10" />
       </div>
       <DevTools />
     </>
