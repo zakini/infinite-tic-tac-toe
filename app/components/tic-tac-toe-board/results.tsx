@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import useGameStore from './store'
 import { useShallow } from 'zustand/shallow'
 import { findWin } from './utils'
@@ -13,9 +13,15 @@ export default function Results({ className = 'relative' }: Props) {
     state.boardState, state.goDeeper, state.startNewGame,
   ]))
   const win = findWin(boardState)
+  const inProgress = win === null
   const draw = win === false
 
-  if (win === null) return null
+  // Ensure conceded is false when a game is in progress
+  useEffect(() => {
+    if (inProgress) setConceded(false)
+  }, [inProgress])
+
+  if (inProgress) return null
 
   return (
     <div className={className} role="dialog" aria-labelledby="results-title">
