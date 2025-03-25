@@ -12,12 +12,6 @@ const _1b: BoardState = [
   _, _, _,
   _, _, _,
 ] as const
-/** Drawn 1 level board */
-const d1b: BoardState = [
-  O, X, O,
-  O, X, X,
-  X, O, X,
-] as const
 /** All blank 2 level board */
 const _2b: BoardState = [
   _1b, _1b, _1b,
