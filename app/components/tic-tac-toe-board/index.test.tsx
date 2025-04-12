@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import TicTacToeBoard from '.'
 import userEvent from '@testing-library/user-event'
@@ -88,20 +88,17 @@ describe('game board', () => {
     }
 
     await userEvent.click(screen.getByText(/go deeper/i))
-    // 9 cells, each containing 9 cells
+    // 9 cells, 1 containing the summary of the won board...
+    const summary = screen.getByLabelText('sub-board won by X')
+    expect(summary.textContent).toBe('X')
+    const summaryButtons = within(summary).queryAllByRole('button')
+    expect(summaryButtons).toStrictEqual([])
+    // ...and the other 8 cells containing 9 cells
     cells = screen.getAllByRole('button')
-    expect(cells.length).toBe(9 ** 2)
+    expect(cells.length).toBe(9 ** 2 - 9)
 
     for (let i = 0; i < cells.length; i++) {
-      // Top right board contains the cells from the winning board, since the last move made by
-      // performWin() is in the top right
-      if (Math.floor(i / 9) === 2) {
-        // The first 5 cells are filled by performWin()
-        if (i % 9 <= 4) expect(cells[i].textContent).not.toBe('')
-        else expect(cells[i].textContent).toBe('')
-      } else {
-        expect(cells[i].textContent).toBe('')
-      }
+      expect(cells[i].textContent).toBe('')
     }
 
     // performWin() makes X win, O should be next to play
@@ -130,33 +127,25 @@ describe('game board', () => {
     }
   })
 
-  it('doesn\'t allow players to click cells in won sub-boards', async () => {
-    render(<TicTacToeBoard />)
-    await performWin()
-    await userEvent.click(screen.getByText(/go deeper/i))
-
-    const cells = screen.getAllByRole('button')
-    // Click the middle right cell of the top right board (this board contains a
-    // win with empty cells)
-    await userEvent.click(cells[9 * 2 + 5])
-    expect(cells[9 * 2 + 5].textContent).toBe('')
-  })
-
   it('doesn\'t allow players to click inactive sub-boards', async () => {
     render(<TicTacToeBoard />)
 
     await performWin()
     await userEvent.click(screen.getByText(/go deeper/i))
 
-    const cells = screen.getAllByRole('button')
+    const boardAndSubBoards = screen.getAllByRole('region')
+    expect(boardAndSubBoards.length).toBe(10)
+    // The first region is the whole board. The other 9 are the sub-boards within that
+    const subBoards = boardAndSubBoards.slice(1)
+    const cellsBySubBoard = subBoards.map(b => within(b).queryAllByRole('button'))
     // Click middle left cell of top left board
-    await userEvent.click(cells[9 * 0 + 3])
-    expect(cells[9 * 0 + 3]).toHaveTextContent('O')
+    await userEvent.click(cellsBySubBoard[0][3])
+    expect(cellsBySubBoard[0][3]).toHaveTextContent('O')
     // Attempt to click a cell in the bottom right board
-    await userEvent.click(cells[9 * 8 + 7])
-    expect(cells[9 * 8 + 7].textContent).toBe('')
+    await userEvent.click(cellsBySubBoard[8][7])
+    expect(cellsBySubBoard[8][7].textContent).toBe('')
     // Click a cell in the middle left board
-    await userEvent.click(cells[9 * 3 + 1])
-    expect(cells[9 * 3 + 1]).toHaveTextContent('X')
+    await userEvent.click(cellsBySubBoard[3][1])
+    expect(cellsBySubBoard[3][1]).toHaveTextContent('X')
   })
 })
