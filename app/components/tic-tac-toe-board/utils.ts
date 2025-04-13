@@ -1,12 +1,18 @@
-import { BoardState, CellState, FilledCellState, isBoardState, SingleLevelBoardState, Win } from './types'
+import {
+  BoardState, CellState, FilledCellState, isBoardState, SingleLevelBoardState, Win,
+} from './types'
 
-export const initialiseBoardState = (): SingleLevelBoardState => Array(9).fill(null) as SingleLevelBoardState
+export const initialiseBoardState = (): SingleLevelBoardState =>
+  Array(9).fill(null) as SingleLevelBoardState
 
 export const pickNestedBoardState = (boardState: BoardState, path: number[]): BoardState => {
   for (const i of path) {
     const maybeBoardState = boardState[i]
     if (!isBoardState(maybeBoardState)) {
-      throw new Error(`Invalid path when picking state: ${JSON.stringify(path)} | ${JSON.stringify(boardState)}`)
+      throw new Error(
+        'Invalid path when picking state: '
+        + `${JSON.stringify(path)} | ${JSON.stringify(boardState)}`,
+      )
     }
     boardState = maybeBoardState
   }
