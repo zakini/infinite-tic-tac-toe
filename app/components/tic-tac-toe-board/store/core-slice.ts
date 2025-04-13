@@ -10,7 +10,9 @@ const getBoardStateAtPath = (board: BoardState, path: number[]): BoardState => {
   return getBoardStateAtPath(nestedBoard, path.slice(1))
 }
 
-const setBoardStateAtPath = (board: BoardState, path: number[], value: FilledCellState): BoardState => {
+const setBoardStateAtPath = (
+  board: BoardState, path: number[], value: FilledCellState,
+): BoardState => {
   if (path.length <= 0) throw new Error('Path cannot be empty')
 
   const i = path[0]
@@ -20,7 +22,10 @@ const setBoardStateAtPath = (board: BoardState, path: number[], value: FilledCel
   let newState
   if (rest.length <= 0) {
     if (target !== null) {
-      throw new Error(`Attempted to set state for non-empty cell: ${JSON.stringify(board)} | ${JSON.stringify(path)} | ${value}`)
+      throw new Error(
+        'Attempted to set state for non-empty cell: '
+        + `${JSON.stringify(board)} | ${JSON.stringify(path)} | ${value}`,
+      )
     }
 
     newState = [
@@ -30,7 +35,10 @@ const setBoardStateAtPath = (board: BoardState, path: number[], value: FilledCel
     ]
   } else {
     if (!isBoardState(target)) {
-      throw new Error(`Attempted to set nested state for non-nested cell: ${JSON.stringify(board)} | ${JSON.stringify(path)} | ${value}`)
+      throw new Error(
+        'Attempted to set nested state for non-nested cell: '
+        + `${JSON.stringify(board)} | ${JSON.stringify(path)} | ${value}`,
+      )
     }
 
     newState = [
@@ -65,7 +73,10 @@ const createCoreSlice = combine(
     takeTurn: (turn: [number, ...number[]]) => set(({ boardState, nextPlayer, turnPath }) => {
       if (!turnValid(turn, turnPath)) {
         throw new Error(
-          `Attempted to take turn in invalid cell: next player: ${nextPlayer} | turn: ${JSON.stringify(turn)} | turn path: ${JSON.stringify(turnPath)}`,
+          'Attempted to take turn in invalid cell: '
+          + `next player: ${nextPlayer} `
+          + `| turn: ${JSON.stringify(turn)} `
+          + `| turn path: ${JSON.stringify(turnPath)}`,
         )
       }
 
@@ -100,9 +111,13 @@ const createCoreSlice = combine(
         ? Array.from(Array<BoardState>(9)).map(() => structuredClone(emptyState))
         // Game was won, nested it into a deeper board
         : [
-            ...Array.from(Array<BoardState>(nestInto)).map(() => structuredClone(emptyState)),
+            ...Array.from(
+              Array<BoardState>(nestInto)).map(() => structuredClone(emptyState),
+            ),
             boardState,
-            ...Array.from(Array<BoardState>(9 - 1 - nestInto)).map(() => structuredClone(emptyState)),
+            ...Array.from(
+              Array<BoardState>(9 - 1 - nestInto)).map(() => structuredClone(emptyState),
+            ),
           ]
 
       assertIsBoardState(newState)

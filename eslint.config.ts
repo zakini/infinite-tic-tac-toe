@@ -54,6 +54,8 @@ const eslintConfig = [
       '@stylistic/brace-style': ['error', '1tbs'],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       '@stylistic/jsx-one-expression-per-line': ['error', { allow: 'single-line' }],
+      'max-len': ['error', { code: 100 }],
+      '@stylistic/quotes': ['error', 'single'],
     },
   },
 ] satisfies Config[]

@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 
-import { BoardCondition, FilledCellState, SingleLevelBoardState } from '@/app/components/tic-tac-toe-board/types'
+import {
+  BoardCondition, FilledCellState, SingleLevelBoardState,
+} from '@/app/components/tic-tac-toe-board/types'
 import { findWin, initialiseBoardState } from '@/app/components/tic-tac-toe-board/utils'
 import fs from 'fs/promises'
 import path from 'path'

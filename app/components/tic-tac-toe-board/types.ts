@@ -32,7 +32,8 @@ export const isBoardState = (v: unknown): v is BoardState => Array.isArray(v)
     v.every(e => isCellState(e))
     || v.every(e => isBoardState(e))
   )
-// NOTE type assertions are weird: https://github.com/microsoft/TypeScript/issues/34523#issuecomment-700491122
+// NOTE type assertions are weird
+// See: https://github.com/microsoft/TypeScript/issues/34523#issuecomment-700491122
 export const assertIsBoardState: (v: unknown) => asserts v is BoardState = (v) => {
   if (!isBoardState(v)) throw new Error(`Board state is invalid: ${JSON.stringify(v)}`)
 }

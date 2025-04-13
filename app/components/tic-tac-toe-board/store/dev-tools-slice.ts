@@ -1,5 +1,7 @@
 import { StateCreator } from 'zustand'
-import { assertIsBoardState, BoardCondition, BoardState, FilledCellState, SingleLevelBoardState } from '../types'
+import {
+  assertIsBoardState, BoardCondition, BoardState, FilledCellState, SingleLevelBoardState,
+} from '../types'
 import { CoreSlice } from './core-slice'
 import allPossibleSingleLevelBoardStates from './states.json'
 
