@@ -25,7 +25,7 @@ export default function Board({ parentPath = [], disabled = null }: Props) {
         )
       : (
           <section
-            className="grid aspect-square w-full grid-cols-3 gap-px bg-black p-px"
+            className="grid aspect-square w-full grid-cols-3 grid-rows-3 gap-px bg-black p-px"
             aria-label="in-progress sub-board"
           >
             {boardState.map((cell, i) => isBoardState(cell)
