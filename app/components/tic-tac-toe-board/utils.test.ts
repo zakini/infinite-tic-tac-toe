@@ -46,14 +46,14 @@ describe('win finder', () => {
       ],
       // O
       [
-        O, _, O,
-        O, X, _,
+        O, O, O,
+        _, X, _,
         _, X, X,
       ],
       // O
       [
-        O, _, O,
-        O, X, _,
+        O, O, O,
+        _, X, _,
         _, X, X,
       ],
       // X
