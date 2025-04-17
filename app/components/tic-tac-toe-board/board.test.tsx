@@ -20,6 +20,12 @@ const x1b: BoardState = [
   O, O, _,
   _, _, _,
 ] as const
+/** 1 level board won by O */
+const o1b: BoardState = [
+  X, X, _,
+  O, O, O,
+  _, _, X,
+] as const
 /** All blank 2 level board */
 const _2b: BoardState = [
   _1b, _1b, _1b,
@@ -70,6 +76,48 @@ describe('board core', () => {
       // O still gets their turn
       await userEvent.click(cells[1])
       expect(cells[1]).toHaveTextContent('O')
+    })
+  })
+
+  describe('nested cell summaries', () => {
+    it('summarises sub-boards won by X', () => {
+      useGameStore.setState({
+        boardState: [
+          _1b, x1b, _1b,
+          _1b, _1b, _1b,
+          _1b, _1b, _1b,
+        ],
+      })
+      render(<Board />)
+
+      const xSubBoard = screen.getByRole('region', { name: /sub-board won by X/i })
+      expect(xSubBoard).toBeInTheDocument()
+      const emptySubBoards = screen.getAllByRole('region', { name: /in-progress sub-board/i })
+      expect(emptySubBoards.length).toBe(8)
+    })
+
+    it('summarises sub-boards won by O', () => {
+      useGameStore.setState({
+        boardState: [
+          _1b, o1b, _1b,
+          _1b, _1b, _1b,
+          _1b, _1b, _1b,
+        ],
+      })
+      render(<Board />)
+
+      const xSubBoard = screen.getByRole('region', { name: /sub-board won by O/i })
+      expect(xSubBoard).toBeInTheDocument()
+      const emptySubBoards = screen.getAllByRole('region', { name: /in-progress sub-board/i })
+      expect(emptySubBoards.length).toBe(8)
+    })
+
+    it('does not summarise the top level board', () => {
+      useGameStore.setState({ boardState: x1b })
+      render(<Board />)
+
+      const cells = screen.getAllByRole('button', { name: /cell/i })
+      expect(cells.length).toBe(9)
     })
   })
 
