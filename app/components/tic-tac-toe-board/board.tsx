@@ -34,15 +34,15 @@ export default function Board({ cellPath = [], disabled = null }: Props) {
   const win = findWin(boardState)
   const winCells = win ? win.cells : null
 
-  const showWinSummary = win && cellPath.length > 0
+  const showSummary = win !== null && cellPath.length > 0
   const showUnknown = cellPath.length >= maxDisplayDepth
 
-  if (showWinSummary || showUnknown) {
+  if (showSummary || showUnknown) {
     return (
       <section
         aria-label={
-          showWinSummary
-            ? `sub-board won by ${win.player}`
+          showSummary
+            ? `sub-board ${win ? `won by ${win.player}` : 'drawn'}`
             : 'sub-board with unknown state'
         }
         className="size-full"
@@ -50,8 +50,13 @@ export default function Board({ cellPath = [], disabled = null }: Props) {
         // Mimic this for this summary by adding 1px of real padding per level this summarises
         style={{ padding: displayDepth }}
       >
-        <div className={classNames('size-full', showWinSummary ? 'bg-green-500' : 'bg-gray-400')}>
-          {(win || null)?.player ?? '?'}
+        <div
+          className={classNames(
+            'size-full',
+            showSummary && win ? 'bg-green-500' : 'bg-gray-400',
+          )}
+        >
+          {showSummary ? (win || null)?.player ?? '-' : '?'}
         </div>
       </section>
     )

@@ -26,6 +26,12 @@ const o1b: BoardState = [
   O, O, O,
   _, _, X,
 ] as const
+/** 1 level drawn board */
+const d1b: BoardState = [
+  X, X, O,
+  O, O, X,
+  X, O, X,
+] as const
 /** All blank 2 level board */
 const _2b: BoardState = [
   _1b, _1b, _1b,
@@ -108,6 +114,22 @@ describe('board core', () => {
 
       const xSubBoard = screen.getByRole('region', { name: /sub-board won by O/i })
       expect(xSubBoard).toBeInTheDocument()
+      const emptySubBoards = screen.getAllByRole('region', { name: /in-progress sub-board/i })
+      expect(emptySubBoards.length).toBe(8)
+    })
+
+    it('summarises drawn sub-boards', () => {
+      useGameStore.setState({
+        boardState: [
+          _1b, d1b, _1b,
+          _1b, _1b, _1b,
+          _1b, _1b, _1b,
+        ],
+      })
+      render(<Board />)
+
+      const drawnSubBoard = screen.getByRole('region', { name: /sub-board drawn/i })
+      expect(drawnSubBoard).toBeInTheDocument()
       const emptySubBoards = screen.getAllByRole('region', { name: /in-progress sub-board/i })
       expect(emptySubBoards.length).toBe(8)
     })
