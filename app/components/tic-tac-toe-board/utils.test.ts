@@ -107,4 +107,126 @@ describe('win finder', () => {
 
     expect(findWin(board)).toBe(false)
   })
+
+  it('allows for draws in sub-boards', () => {
+    const board: BoardState = [
+      // _
+      [
+        _, _, _,
+        _, _, _,
+        _, _, _,
+      ],
+      // d
+      [
+        O, X, O,
+        O, X, X,
+        X, O, X,
+      ],
+      // _
+      [
+        _, _, _,
+        _, _, _,
+        _, _, _,
+      ],
+      // _
+      [
+        _, _, _,
+        _, _, _,
+        _, _, _,
+      ],
+      // _
+      [
+        _, _, _,
+        _, _, _,
+        _, _, _,
+      ],
+      // _
+      [
+        _, _, _,
+        _, _, _,
+        _, _, _,
+      ],
+      // _
+      [
+        _, _, _,
+        _, _, _,
+        _, _, _,
+      ],
+      // _
+      [
+        _, _, _,
+        _, _, _,
+        _, _, _,
+      ],
+      // _
+      [
+        _, _, _,
+        _, _, _,
+        _, _, _,
+      ],
+    ]
+
+    expect(findWin(board)).toBeNull()
+  })
+
+  it('finds nested draws', () => {
+    const board: BoardState = [
+      // d
+      [
+        O, X, O,
+        O, X, X,
+        X, O, X,
+      ],
+      // d
+      [
+        O, X, O,
+        O, X, X,
+        X, O, X,
+      ],
+      // d
+      [
+        O, X, O,
+        O, X, X,
+        X, O, X,
+      ],
+      // d
+      [
+        O, X, O,
+        O, X, X,
+        X, O, X,
+      ],
+      // d
+      [
+        O, X, O,
+        O, X, X,
+        X, O, X,
+      ],
+      // d
+      [
+        O, X, O,
+        O, X, X,
+        X, O, X,
+      ],
+      // d
+      [
+        O, X, O,
+        O, X, X,
+        X, O, X,
+      ],
+      // d
+      [
+        O, X, O,
+        O, X, X,
+        X, O, X,
+      ],
+      // d
+      [
+        O, X, O,
+        O, X, X,
+        X, O, X,
+      ],
+    ]
+
+    expect(findWin(board)).toBe(false)
+  })
 })
