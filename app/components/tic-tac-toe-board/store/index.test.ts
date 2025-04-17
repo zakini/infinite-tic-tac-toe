@@ -191,7 +191,7 @@ describe('game store dev tools', () => {
     return isBoardEmpty(cell)
   }, true)
 
-  it.for([
+  const itForEachConditionAndDepth = it.for([
     [BoardCondition.Empty, 1],
     [BoardCondition.Empty, 2],
     [BoardCondition.Empty, 3],
@@ -207,37 +207,42 @@ describe('game store dev tools', () => {
     [BoardCondition.WonO, 1],
     [BoardCondition.WonO, 2],
     [BoardCondition.WonO, 3],
-  ] as const)('can generate a %s %i level board state', ([condition, depth]) => {
-    const forceBoardCondition = useGameStore.getState().forceBoardCondition
-    forceBoardCondition(condition, depth)
+  ] as const)
+  itForEachConditionAndDepth(
+    'can generate a %s %i level board state',
+    { repeats: 50 },
+    ([condition, depth]) => {
+      const forceBoardCondition = useGameStore.getState().forceBoardCondition
+      forceBoardCondition(condition, depth)
 
-    const boardState = useGameStore.getState().boardState
-    const win = findWin(boardState)
+      const boardState = useGameStore.getState().boardState
+      const win = findWin(boardState)
 
-    expect(calcDepth(boardState)).toBe(depth)
+      expect(calcDepth(boardState)).toBe(depth)
 
-    switch (condition) {
-      case BoardCondition.Empty:
-        expect(win).toBe(null)
-        expect(isBoardEmpty(boardState)).toBe(true)
-        break
+      switch (condition) {
+        case BoardCondition.Empty:
+          expect(win).toBe(null)
+          expect(isBoardEmpty(boardState)).toBe(true)
+          break
 
-      case BoardCondition.InProgress:
-        expect(win).toBe(null)
-        expect(isBoardEmpty(boardState)).toBe(false)
-        break
+        case BoardCondition.InProgress:
+          expect(win).toBe(null)
+          expect(isBoardEmpty(boardState)).toBe(false)
+          break
 
-      case BoardCondition.Drawn:
-        expect(win).toBe(false)
-        break
+        case BoardCondition.Drawn:
+          expect(win).toBe(false)
+          break
 
-      case BoardCondition.WonX:
-        expect((win || null)?.player).toBe(FilledCellState.X)
-        break
+        case BoardCondition.WonX:
+          expect((win || null)?.player).toBe(FilledCellState.X)
+          break
 
-      case BoardCondition.WonO:
-        expect((win || null)?.player).toBe(FilledCellState.O)
-        break
-    }
-  })
+        case BoardCondition.WonO:
+          expect((win || null)?.player).toBe(FilledCellState.O)
+          break
+      }
+    },
+  )
 })

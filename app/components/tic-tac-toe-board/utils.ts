@@ -47,7 +47,7 @@ export const findWin = (board: BoardState): Win | null | false => {
     const i = Number(k)
     const cell = resolveCellState(board[i])
 
-    if (cell === false) return false
+    if (cell === false) continue
 
     if (cell === null) {
       movesAvailable = true

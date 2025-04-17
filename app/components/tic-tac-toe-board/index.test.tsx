@@ -62,6 +62,12 @@ const x2b: BoardState = [
   _1b, _1b, _1b,
   _1b, _1b, _1b,
 ] as const
+/** 1 level drawn board */
+const d1b: BoardState = [
+  X, X, O,
+  O, O, X,
+  X, O, X,
+] as const
 
 describe('game board', () => {
   const performWin = async () => {
@@ -373,6 +379,50 @@ describe('game board', () => {
 
       const wonSubBoard = screen.getByRole('region', { name: /sub-board won/i })
       expect(wonSubBoard).toBeInTheDocument()
+      const emptyCells = screen.getAllByRole('region', { name: /empty cell/i })
+      expect(emptyCells.length).toBe(9 * 9 * 8)
+    })
+
+    it('zooms out when visible sub-board is drawn', async () => {
+      /** 1 level board that's almost a draw */
+      const a1b: BoardState = [
+        X, O, _,
+        O, X, X,
+        O, X, O,
+      ] as const
+      /** 2 level board that's almost a draw */
+      const a2b: BoardState = [
+        d1b, d1b, a1b,
+        d1b, d1b, d1b,
+        d1b, d1b, d1b,
+      ] as const
+
+      // set up 3 level board that has a 2 level board that is almost a draw
+      useGameStore.setState({
+        boardState: [
+          a2b, _2b, _2b,
+          _2b, _2b, _2b,
+          _2b, _2b, _2b,
+        ] as const,
+      })
+      render(<TicTacToeBoard />)
+
+      // zoom into the almost drawn 2 level board
+      const subBoards = screen.getAllByRole('button')
+      expect(subBoards.length).toBe(9)
+      await userEvent.click(subBoards[0])
+
+      // draw the almost drawn 2 level board
+      const buttonCells = screen.getAllByRole('button', { name: /cell/i })
+      expect(buttonCells.length).toBe(9)
+      await userEvent.click(buttonCells[2])
+
+      // check we zoomed out automatically
+      const zoomOutButton = screen.queryByText(/zoom out/i)
+      expect(zoomOutButton).not.toBeInTheDocument()
+
+      const drawnSubBoard = screen.getByRole('region', { name: /sub-board drawn/i })
+      expect(drawnSubBoard).toBeInTheDocument()
       const emptyCells = screen.getAllByRole('region', { name: /empty cell/i })
       expect(emptyCells.length).toBe(9 * 9 * 8)
     })
