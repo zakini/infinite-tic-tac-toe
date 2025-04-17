@@ -2,70 +2,133 @@ import { useShallow } from 'zustand/shallow'
 import useGameStore from './store'
 import { findWin, pickNestedBoardState, turnValid } from './utils'
 import { BoardState, isBoardState } from './types'
+import classNames from 'classnames'
+import { JSX } from 'react'
+
+const maxDisplayDepth = 3
 
 type Props = {
-  parentPath?: number[]
+  cellPath?: number[]
   disabled?: boolean | null
 }
 
-const boardDepth = (board: BoardState): number => isBoardState(board[0])
-  ? boardDepth(board[0]) + 1
+const calcBoardDepth = (board: BoardState): number => isBoardState(board[0])
+  ? calcBoardDepth(board[0]) + 1
   : 1
 
-export default function Board({ parentPath = [], disabled = null }: Props) {
-  const [fullBoardState, takeTurn, turnPath] = useGameStore(useShallow(
-    state => [state.boardState, state.takeTurn, state.turnPath],
+export default function Board({ cellPath = [], disabled = null }: Props) {
+  const [fullBoardState, takeTurn, turnPath, zoomPath, zoomIn] = useGameStore(useShallow(
+    state => [state.boardState, state.takeTurn, state.turnPath, state.zoomPath, state.zoomIn],
   ))
-  const boardState = pickNestedBoardState(fullBoardState, parentPath)
-  const depth = boardDepth(boardState)
+
+  const trueCellPath = [...zoomPath, ...cellPath]
+  const boardState = pickNestedBoardState(fullBoardState, trueCellPath)
+
+  const displayDepthAdjustment = Math.max(0, calcBoardDepth(fullBoardState) - maxDisplayDepth)
+  const boardDepth = calcBoardDepth(boardState)
+  const displayDepth = boardDepth - displayDepthAdjustment
+
+  const canZoomIn = cellPath.length === 1 && boardDepth > 1
+  const belowZoomTarget = cellPath.length > 1
+
   const win = findWin(boardState)
   const winCells = win ? win.cells : null
 
+  const showWinSummary = win && cellPath.length > 0
+  const showUnknown = cellPath.length >= maxDisplayDepth
+
+  if (showWinSummary || showUnknown) {
+    return (
+      <section
+        aria-label={
+          showWinSummary
+            ? `sub-board won by ${win.player}`
+            : 'sub-board with unknown state'
+        }
+        className="size-full"
+        // Each sub-board adds 1px of 'padding' (via gap)
+        // Mimic this for this summary by adding 1px of real padding per level this summarises
+        style={{ padding: displayDepth }}
+      >
+        <div className={classNames('size-full', showWinSummary ? 'bg-green-500' : 'bg-gray-400')}>
+          {(win || null)?.player ?? '?'}
+        </div>
+      </section>
+    )
+  }
+
+  // Buttons cannot be nested inside each other. If the user should be able to zoom, then the
+  // container should be a button, otherwise the cell should be a button
+  // NOTE just adding a click handler to the container works, but it's bad for accessibility and
+  // means we have to deal with event bubbling
+  const Container = (canZoomIn
+    ? 'button'
+    : 'section') satisfies keyof JSX.IntrinsicElements
+  const Cell = (canZoomIn || belowZoomTarget
+    ? 'section'
+    : 'button') satisfies keyof JSX.IntrinsicElements
+
   return (
-    win && parentPath.length > 0
-      ? (
-          <section
-            className="size-full"
-            // Each sub-board adds 1px of 'padding' (via gap)
-            // Mimic this for this summary by adding 1px of real padding per level this summarises
-            style={{ padding: depth }}
-            aria-label={`sub-board won by ${win.player}`}
-          >
-            <div className="size-full bg-green-500">
-              {win.player}
-            </div>
-          </section>
-        )
-      : (
-          <section
-            className="grid aspect-square w-full grid-cols-3 grid-rows-3 gap-px bg-black p-px"
-            aria-label="in-progress sub-board"
-          >
-            {boardState.map((cell, i) => isBoardState(cell)
-              ? (
-                  <Board
-                    key={i}
-                    parentPath={[...parentPath, i]}
-                    disabled={disabled || !turnValid([...parentPath, i], turnPath)}
-                  />
-                )
-              : (
-                  <button
-                    key={i}
-                    className={`relative aspect-square ${winCells?.includes(i)
-                      ? 'bg-green-500'
-                      : 'bg-white disabled:bg-gray-400'}`}
-                    disabled={disabled || win !== null || cell !== null}
-                    onClick={() => {
-                      // This is a bug in Typescript. Use 'as' to override
-                      // See: https://github.com/microsoft/TypeScript/issues/60463
-                      takeTurn([...parentPath, i] as unknown as [number, ...number[]])
-                    }}
-                  >
-                    <span className="absolute">{cell}</span>
-                  </button>
-                ))}
-          </section>
-        )
+    <Container
+      aria-label={`in-progress ${cellPath.length <= 0 ? 'board' : 'sub-board'}`}
+      className={classNames(
+        'grid aspect-square w-full grid-cols-3 grid-rows-3 gap-px bg-black p-px',
+        {
+          'hover:ring hover:ring-red-500 focus:ring focus:ring-red-500':
+            Container === 'button',
+        },
+      )}
+      {...(
+        Container === 'button'
+          ? {
+              onClick: () => zoomIn(trueCellPath),
+            }
+          : {}
+      )}
+    >
+      {boardState.map((cell, i) => {
+        const subBoardDisabled = disabled || !turnValid([...trueCellPath, i], turnPath)
+        const cellDisabled = disabled || win !== null || cell !== null
+        const cellPartOfWin = winCells?.includes(i)
+
+        return isBoardState(cell)
+          ? (
+              <Board key={i} cellPath={[...cellPath, i]} disabled={subBoardDisabled} />
+            )
+          : (
+              <Cell
+                key={i}
+                aria-label={cell === null ? 'empty cell' : `cell taken by ${cell}`}
+                className={classNames(
+                  'relative aspect-square',
+                  {
+                    'bg-green-500': cellPartOfWin,
+                    // Handle disabled styling manually, since disabled won't apply when this isn't
+                    // rendering as a button
+                    'bg-gray-400': !cellPartOfWin && cellDisabled,
+                    'bg-white': !cellPartOfWin && !cellDisabled,
+                  },
+                )}
+                {...(
+                  Cell === 'button'
+                    ? {
+                        disabled: cellDisabled,
+                        onClick: () => {
+                          // Do nothing and let this event bubble up so we can zoom in instead
+                          if (belowZoomTarget) return
+
+                          // This is a bug in Typescript. Use 'as' to override
+                          // See: https://github.com/microsoft/TypeScript/issues/60463
+                          takeTurn([...trueCellPath, i] as unknown as [number, ...number[]])
+                        },
+                      }
+                    : {}
+                )}
+              >
+                <span className="absolute">{cell}</span>
+              </Cell>
+            )
+      })}
+    </Container>
   )
 }
