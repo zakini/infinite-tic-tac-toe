@@ -68,36 +68,46 @@ const createCoreSlice = combine(
     nextPlayer: FilledCellState.X,
     turnPath: [] as number[],
     previousTurn: null as [number, ...number[]] | null,
+    zoomPath: [] as number[],
   },
   (set, _, store) => ({
-    takeTurn: (turn: [number, ...number[]]) => set(({ boardState, nextPlayer, turnPath }) => {
-      if (!turnValid(turn, turnPath)) {
-        throw new Error(
-          'Attempted to take turn in invalid cell: '
-          + `next player: ${nextPlayer} `
-          + `| turn: ${JSON.stringify(turn)} `
-          + `| turn path: ${JSON.stringify(turnPath)}`,
-        )
-      }
+    takeTurn: (turn: [number, ...number[]]) =>
+      set(({ boardState, nextPlayer, turnPath, zoomPath }) => {
+        if (!turnValid(turn, turnPath)) {
+          throw new Error(
+            'Attempted to take turn in invalid cell: '
+            + `next player: ${nextPlayer} `
+            + `| turn: ${JSON.stringify(turn)} `
+            + `| turn path: ${JSON.stringify(turnPath)}`,
+          )
+        }
 
-      const newBoardState = setBoardStateAtPath(boardState, turn, nextPlayer)
+        const newBoardState = setBoardStateAtPath(boardState, turn, nextPlayer)
 
-      let newTurnPath: number[] = []
-      if (turn.length > 1) {
-        newTurnPath = [...turn.slice(0, -2), turn[turn.length - 1]]
+        let newTurnPath: number[] = []
+        if (turn.length > 1) {
+          newTurnPath = [...turn.slice(0, -2), turn[turn.length - 1]]
 
-        const targetBoard = getBoardStateAtPath(newBoardState, newTurnPath)
-        // Target board is already complete, next player's move can be anywhere
-        if (findWin(targetBoard) !== null) newTurnPath = []
-      }
+          const targetBoard = getBoardStateAtPath(newBoardState, newTurnPath)
+          // Target board is already complete, next player's move can be anywhere
+          if (findWin(targetBoard) !== null) newTurnPath = []
+        }
 
-      return {
-        boardState: newBoardState,
-        nextPlayer: nextPlayer === FilledCellState.X ? FilledCellState.O : FilledCellState.X,
-        turnPath: newTurnPath,
-        previousTurn: turn,
-      }
-    }),
+        // TODO if the board at zoomPath is won, zoom out (unless zoomPath is empty)
+        let newZoomPath = zoomPath
+        if (zoomPath.length > 0) {
+          const zoomTargetBoard = getBoardStateAtPath(newBoardState, zoomPath)
+          if (findWin(zoomTargetBoard) !== null) newZoomPath = zoomPath.slice(0, -1)
+        }
+
+        return {
+          boardState: newBoardState,
+          nextPlayer: nextPlayer === FilledCellState.X ? FilledCellState.O : FilledCellState.X,
+          turnPath: newTurnPath,
+          previousTurn: turn,
+          zoomPath: newZoomPath,
+        }
+      }),
     goDeeper: () => set(({ boardState, previousTurn }) => {
       // Embed the current board state into same cell as the last turn of a new board nested to the
       // same depth
@@ -128,6 +138,30 @@ const createCoreSlice = combine(
       }
     }),
     startNewGame: () => set(store.getInitialState()),
+    zoomIn: (newZoomPath: number[]) => set(({ zoomPath }) => {
+      if (newZoomPath.length <= zoomPath.length) {
+        throw new Error(
+          'Zoom path does not actually zoom in: '
+          + `new: ${JSON.stringify(newZoomPath)} | old: ${JSON.stringify(zoomPath)}`,
+        )
+      }
+
+      if (newZoomPath.length - zoomPath.length > 1) {
+        throw new Error(
+          'Zoom path zooms in too far: '
+          + `new: ${JSON.stringify(newZoomPath)} | old: ${JSON.stringify(zoomPath)}`,
+        )
+      }
+
+      return { zoomPath: newZoomPath }
+    }),
+    zoomOut: () => set(({ zoomPath }) => {
+      if (zoomPath.length <= 0) throw new Error('Attempted to zoom out from top level')
+
+      return {
+        zoomPath: zoomPath.slice(0, -1),
+      }
+    }),
   }),
 )
 

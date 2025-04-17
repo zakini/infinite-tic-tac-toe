@@ -2,6 +2,66 @@ import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import TicTacToeBoard from '.'
 import userEvent from '@testing-library/user-event'
+import { BoardState, FilledCellState } from './types'
+import useGameStore from './store'
+
+const X = FilledCellState.X
+const O = FilledCellState.O
+const _ = null
+/** All blank 1 level board */
+const _1b: BoardState = [
+  _, _, _,
+  _, _, _,
+  _, _, _,
+] as const
+/** All blank 2 level board */
+const _2b: BoardState = [
+  _1b, _1b, _1b,
+  _1b, _1b, _1b,
+  _1b, _1b, _1b,
+] as const
+/** All blank 3 level board */
+const _3b: BoardState = [
+  _2b, _2b, _2b,
+  _2b, _2b, _2b,
+  _2b, _2b, _2b,
+] as const
+/** 1 level board with some moves made */
+const p1b: BoardState = [
+  _, _, O,
+  _, X, _,
+  _, _, _,
+] as const
+/** 2 level board with some moves made at the deepest level */
+const p2b: BoardState = [
+  p1b, _1b, _1b,
+  _1b, _1b, _1b,
+  _1b, _1b, _1b,
+] as const
+/** 3 level board with some moves made at the deepest level */
+const p3b: BoardState = [
+  p2b, _2b, _2b,
+  _2b, _2b, _2b,
+  _2b, _2b, _2b,
+] as const
+/** 4 level board with some moves made at the deepest level */
+const p4b: BoardState = [
+  p3b, _3b, _3b,
+  _3b, _3b, _3b,
+  _3b, _3b, _3b,
+] as const
+/** 1 level board won by X */
+const x1b: BoardState = [
+  X, X, X,
+  O, O, _,
+  _, _, _,
+] as const
+/** 2 level board won by X */
+const x2b: BoardState = [
+  x1b, x1b, x1b,
+  _1b, _1b, _1b,
+  _1b, _1b, _1b,
+] as const
 
 describe('game board', () => {
   const performWin = async () => {
@@ -72,80 +132,249 @@ describe('game board', () => {
     expect(screen.getByText(/current player/i).textContent).toContain('X')
   })
 
-  it('can go deeper', async () => {
-    render(<TicTacToeBoard />)
-    let cells = screen.getAllByRole('button')
-    expect(cells.length).toBe(9)
+  describe('go deeper', () => {
+    it('can go deeper', async () => {
+      render(<TicTacToeBoard />)
+      let cells = screen.getAllByRole('button')
+      expect(cells.length).toBe(9)
 
-    await performWin()
+      await performWin()
 
-    for (const cell of cells.slice(0, 3)) {
-      expect(cell).toHaveClass('bg-green-500')
-    }
+      for (const cell of cells.slice(0, 3)) {
+        expect(cell).toHaveClass('bg-green-500')
+      }
 
-    for (const cell of cells.slice(3)) {
-      expect(cell).not.toHaveClass('bg-green-500')
-    }
+      for (const cell of cells.slice(3)) {
+        expect(cell).not.toHaveClass('bg-green-500')
+      }
 
-    await userEvent.click(screen.getByText(/go deeper/i))
-    // 9 cells, 1 containing the summary of the won board...
-    const summary = screen.getByLabelText('sub-board won by X')
-    expect(summary.textContent).toBe('X')
-    const summaryButtons = within(summary).queryAllByRole('button')
-    expect(summaryButtons).toStrictEqual([])
-    // ...and the other 8 cells containing 9 cells
-    cells = screen.getAllByRole('button')
-    expect(cells.length).toBe(9 ** 2 - 9)
+      await userEvent.click(screen.getByText(/go deeper/i))
+      // 9 cells, 1 containing the summary of the won board...
+      const summary = screen.getByLabelText('sub-board won by X')
+      expect(summary.textContent).toBe('X')
+      const summaryButtons = within(summary).queryAllByRole('button')
+      expect(summaryButtons).toStrictEqual([])
+      // ...and the other 8 cells containing 9 cells
+      cells = screen.getAllByRole('button')
+      expect(cells.length).toBe(9 ** 2 - 9)
 
-    for (let i = 0; i < cells.length; i++) {
-      expect(cells[i].textContent).toBe('')
-    }
+      for (let i = 0; i < cells.length; i++) {
+        expect(cells[i].textContent).toBe('')
+      }
 
-    // performWin() makes X win, O should be next to play
-    expect(screen.getByText(/current player/i).textContent).toContain('O')
+      // performWin() makes X win, O should be next to play
+      expect(screen.getByText(/current player/i).textContent).toContain('O')
+    })
+
+    it('clears the board when going deeper from a draw', async () => {
+      render(<TicTacToeBoard />)
+      let cells = screen.getAllByRole('button')
+      expect(cells.length).toBe(9)
+
+      await performDraw()
+
+      for (const cell of cells) {
+        expect(cell).not.toHaveClass('bg-green-500')
+      }
+
+      await userEvent.click(screen.getByText(/go deeper/i))
+      // 9 cells, each containing 9 cells
+      cells = screen.getAllByRole('button')
+      expect(screen.getAllByRole('button').length).toBe(9 ** 2)
+
+      for (const cell of cells) {
+        // All cells should be empty
+        expect(cell.textContent).toBe('')
+      }
+    })
+
+    it('doesn\'t allow players to click inactive sub-boards', async () => {
+      render(<TicTacToeBoard />)
+
+      await performWin()
+      await userEvent.click(screen.getByText(/go deeper/i))
+
+      const boardAndSubBoards = screen.getAllByRole('region')
+      expect(boardAndSubBoards.length).toBe(10)
+      // The first region is the whole board. The other 9 are the sub-boards within that
+      const subBoards = boardAndSubBoards.slice(1)
+      const cellsBySubBoard = subBoards.map(b => within(b).queryAllByRole('button'))
+      // Click middle left cell of top left board
+      await userEvent.click(cellsBySubBoard[0][3])
+      expect(cellsBySubBoard[0][3]).toHaveTextContent('O')
+      // Attempt to click a cell in the bottom right board
+      await userEvent.click(cellsBySubBoard[8][7])
+      expect(cellsBySubBoard[8][7].textContent).toBe('')
+      // Click a cell in the middle left board
+      await userEvent.click(cellsBySubBoard[3][1])
+      expect(cellsBySubBoard[3][1]).toHaveTextContent('X')
+    })
   })
 
-  it('clears the board when going deeper from a draw', async () => {
-    render(<TicTacToeBoard />)
-    let cells = screen.getAllByRole('button')
-    expect(cells.length).toBe(9)
+  describe('zoom', () => {
+    it('can zoom into and out of deep state', async () => {
+      useGameStore.setState({ boardState: p4b })
+      render(<TicTacToeBoard />)
 
-    await performDraw()
+      // 9 buttons at top level, each containing unknown sub-boards
+      let buttonCells = screen.getAllByRole('button', { name: /sub-board/i })
+      expect(buttonCells.length).toBe(9)
+      for (const cell of buttonCells) {
+        const unknownCells = within(cell).getAllByRole('region', { name: /unknown state/i })
+        expect(unknownCells.length).toBe(9 ** 2)
+      }
 
-    for (const cell of cells) {
-      expect(cell).not.toHaveClass('bg-green-500')
-    }
+      // click the top left sub-board
+      await userEvent.click(buttonCells[0])
 
-    await userEvent.click(screen.getByText(/go deeper/i))
-    // 9 cells, each containing 9 cells
-    cells = screen.getAllByRole('button')
-    expect(screen.getAllByRole('button').length).toBe(9 ** 2)
+      expect(screen.getByText(/\(0, 0\)/)).toBeInTheDocument()
+      // 9 buttons at this level, each containing empty or filled cells
+      buttonCells = screen.getAllByRole('button', { name: /sub-board/i })
+      expect(buttonCells.length).toBe(9)
+      for (const cell of buttonCells) {
+        const cells = within(cell)
+          .getAllByRole('region', { name: /empty cell|cell taken by [XO]/i })
+        expect(cells.length).toBe(9 ** 2)
+      }
 
-    for (const cell of cells) {
-      // All cells should be empty
-      expect(cell.textContent).toBe('')
-    }
-  })
+      await userEvent.click(screen.getByText(/zoom out/i))
 
-  it('doesn\'t allow players to click inactive sub-boards', async () => {
-    render(<TicTacToeBoard />)
+      // 9 buttons at top level, each containing unknown sub-boards
+      buttonCells = screen.getAllByRole('button', { name: /sub-board/i })
+      expect(buttonCells.length).toBe(9)
+      for (const cell of buttonCells) {
+        const unknownCells = within(cell).getAllByRole('region', { name: /unknown state/i })
+        expect(unknownCells.length).toBe(9 ** 2)
+      }
+    })
 
-    await performWin()
-    await userEvent.click(screen.getByText(/go deeper/i))
+    it('cannot zoom into shallow state', () => {
+      useGameStore.setState({ boardState: _2b })
+      render(<TicTacToeBoard />)
 
-    const boardAndSubBoards = screen.getAllByRole('region')
-    expect(boardAndSubBoards.length).toBe(10)
-    // The first region is the whole board. The other 9 are the sub-boards within that
-    const subBoards = boardAndSubBoards.slice(1)
-    const cellsBySubBoard = subBoards.map(b => within(b).queryAllByRole('button'))
-    // Click middle left cell of top left board
-    await userEvent.click(cellsBySubBoard[0][3])
-    expect(cellsBySubBoard[0][3]).toHaveTextContent('O')
-    // Attempt to click a cell in the bottom right board
-    await userEvent.click(cellsBySubBoard[8][7])
-    expect(cellsBySubBoard[8][7].textContent).toBe('')
-    // Click a cell in the middle left board
-    await userEvent.click(cellsBySubBoard[3][1])
-    expect(cellsBySubBoard[3][1]).toHaveTextContent('X')
+      const buttonCells = screen.queryAllByRole('button', { name: /sub-board/i })
+      expect(buttonCells.length).toBe(0)
+    })
+
+    it('cannot zoom too far into deep state', async () => {
+      useGameStore.setState({ boardState: _3b })
+      render(<TicTacToeBoard />)
+
+      // 9 buttons at top level, each containing empty sub-boards
+      let buttonCells = screen.getAllByRole('button', { name: /sub-board/i })
+      expect(buttonCells.length).toBe(9)
+      for (const cell of buttonCells) {
+        const unknownCells = within(cell).getAllByRole('region', { name: /empty cell/i })
+        expect(unknownCells.length).toBe(9 ** 2)
+      }
+
+      // click the top left sub-board
+      await userEvent.click(buttonCells[0])
+
+      // no sub-board buttons, just buttons for each empty cell
+      buttonCells = screen.getAllByRole('region', { name: /sub-board/i })
+      expect(buttonCells.length).toBe(9)
+      for (const cell of buttonCells) {
+        const unknownCells = within(cell).getAllByRole('button', { name: /empty cell/i })
+        expect(unknownCells.length).toBe(9)
+      }
+    })
+
+    it('cannot zoom into won board', async () => {
+      useGameStore.setState({
+        boardState: [
+          x2b, _2b, _2b,
+          _2b, _2b, _2b,
+          _2b, _2b, _2b,
+        ] as const,
+      })
+      render(<TicTacToeBoard />)
+
+      // 1 top level sub-board that has been won, the rest all empty cells
+      let wonCell = screen.getByLabelText(/sub-board won/i)
+      expect(wonCell).toBeInTheDocument()
+      let emptyCells = screen.getAllByRole('region', { name: /empty cell/i })
+      expect(emptyCells.length).toBe((9 ** 2) * 8)
+
+      await userEvent.click(wonCell)
+
+      // check for same visible board state
+      wonCell = screen.getByLabelText(/sub-board won/i)
+      expect(wonCell).toBeInTheDocument()
+      emptyCells = screen.getAllByRole('region', { name: /empty cell/i })
+      expect(emptyCells.length).toBe((9 ** 2) * 8)
+    })
+
+    it('cannot zoom out at top level', () => {
+      useGameStore.setState({ boardState: _3b })
+      render(<TicTacToeBoard />)
+
+      const zoomOutButton = screen.queryByText(/zoom out/i)
+      expect(zoomOutButton).not.toBeInTheDocument()
+    })
+
+    it('cannot take turn unless at max zoom', async () => {
+      useGameStore.setState({ boardState: _3b })
+      render(<TicTacToeBoard />)
+
+      let emptyCells = screen.getAllByLabelText(/empty cell/i)
+      expect(emptyCells.length).toBe(9 ** 3)
+
+      await userEvent.click(emptyCells[1])
+
+      // turn not taken, zoomed in instead
+      emptyCells = screen.getAllByLabelText(/empty cell/i)
+      expect(emptyCells.length).toBe(9 ** 2)
+
+      await userEvent.click(emptyCells[1])
+
+      // actually took a turn
+      const xCell = screen.getByLabelText(/cell taken by X/i)
+      expect(xCell).toBeInTheDocument()
+    })
+
+    it('zooms out when visible sub-board is won', async () => {
+      /** 1 level board that's almost been won by X */
+      const a1b: BoardState = [
+        X, X, _,
+        O, O, _,
+        _, _, _,
+      ] as const
+      /** 2 level board that's almost been won by X */
+      const a2b: BoardState = [
+        x1b, x1b, a1b,
+        _1b, _1b, _1b,
+        _1b, _1b, _1b,
+      ] as const
+
+      // set up 3 level board that has a 2 level board that has almost been won
+      useGameStore.setState({
+        boardState: [
+          a2b, _2b, _2b,
+          _2b, _2b, _2b,
+          _2b, _2b, _2b,
+        ] as const,
+      })
+      render(<TicTacToeBoard />)
+
+      // zoom into the almost won 2 level board
+      const subBoards = screen.getAllByRole('button')
+      expect(subBoards.length).toBe(9)
+      await userEvent.click(subBoards[0])
+
+      // win the almost won 2 level board
+      const buttonCells = screen.getAllByRole('button', { name: /cell/i })
+      expect(buttonCells.length).toBe(9 * 7)
+      await userEvent.click(buttonCells[2])
+
+      // check we zoomed out automatically
+      const zoomOutButton = screen.queryByText(/zoom out/i)
+      expect(zoomOutButton).not.toBeInTheDocument()
+
+      const wonSubBoard = screen.getByRole('region', { name: /sub-board won/i })
+      expect(wonSubBoard).toBeInTheDocument()
+      const emptyCells = screen.getAllByRole('region', { name: /empty cell/i })
+      expect(emptyCells.length).toBe(9 * 9 * 8)
+    })
   })
 })

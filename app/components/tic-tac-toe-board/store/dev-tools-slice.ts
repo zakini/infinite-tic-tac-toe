@@ -4,6 +4,7 @@ import {
 } from '../types'
 import { CoreSlice } from './core-slice'
 import allPossibleSingleLevelBoardStates from './states.json'
+import useGameStore from '.'
 
 type SliceStateCreator<T, U> = StateCreator<U & T, [], [], T>
 
@@ -48,7 +49,9 @@ export type DevToolsSlice = {
 
 const createDevToolsSlice: SliceStateCreator<DevToolsSlice, CoreSlice> = set => ({
   forceBoardCondition: (condition: BoardCondition, depth: number) => set({
+    ...useGameStore.getInitialState(),
     boardState: generateBoardForCondition(condition, depth),
+    // TODO figure out correct value for nextPlayer based on the generated board
   }),
 })
 
