@@ -1,5 +1,11 @@
 /* eslint-disable no-console */
 
+/**
+ * This script generates all possible board states, groups them by condition and stores the result
+ * into a JSON file. This file is then used by this app's dev tools to put the game into a
+ * particular state
+ */
+
 import {
   BoardCondition, FilledCellState, SingleLevelBoardState,
 } from '@/app/components/tic-tac-toe-board/types'
