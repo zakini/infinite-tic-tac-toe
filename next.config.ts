@@ -2,7 +2,18 @@ import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Dummy Turbopack config to silence a warning
+  // This is needed because Sentry needs to configure Webpack, and Next complains if Webpack is
+  // configured and Turbopack isn't. We could just swap to using Webpack, but it's slower and
+  // Webpack complains about us using top-level await in app/components/tic-tac-toe-board/index.tsx.
+  // We're only using Turbopack in dev though, we're using Webpack in production. Can't see that
+  // warning about top-level await in the build logs though 🤷
+  // See: https://github.com/getsentry/sentry-javascript/issues/8105
+  // Turbopack in Next is currently only stable in dev
+  // See: https://nextjs.org/docs/app/api-reference/turbopack#getting-started
+  turbopack: {
+    rules: { foo: { loaders: [] } },
+  },
 }
 
 export default withSentryConfig(nextConfig, {
