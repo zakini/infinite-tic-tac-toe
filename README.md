@@ -6,12 +6,17 @@
 It's like [Ultimate Tic Tac Toe](https://en.wikipedia.org/wiki/Ultimate_tic-tac-toe), but more
 Ultimate
 
+## Links
+- Site: https://infinite-tic-tac-toe-beta.vercel.app
+- Sentry: https://zakini.sentry.io/projects/infinite-tic-tac-toe
+
 ## Tech
 - Framework: [⏭️ Next.js](https://nextjs.org/)
 - Hosting: [▲ Vercel](https://vercel.com/)
 - State: [🐻 Zustand](https://zustand.docs.pmnd.rs)
 - Linting: [⬣ ESLint](https://eslint.org/) and [📜 TypeScript](https://www.typescriptlang.org/)
 - Testing: [⚡️ Vitest](https://vitest.dev/)
+- Error Monitoring: [🔍 Sentry](https://sentry.io)
 
 ## Local Setup
 1. Install the correct Node.js version (defined in [.node-version](./.node-version))  
