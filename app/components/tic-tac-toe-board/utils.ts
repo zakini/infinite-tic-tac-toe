@@ -1,5 +1,10 @@
 import {
-  BoardState, CellState, FilledCellState, isBoardState, SingleLevelBoardState, Win,
+  type BoardState,
+  type CellState,
+  type FilledCellState,
+  isBoardState,
+  type SingleLevelBoardState,
+  type Win,
 } from './types'
 
 export const initialiseBoardState = (): SingleLevelBoardState =>

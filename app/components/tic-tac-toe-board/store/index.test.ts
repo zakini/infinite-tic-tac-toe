@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import useGameStore from '.'
-import { BoardCondition, BoardState, FilledCellState, isCellState } from '../types'
+import { BoardCondition, type BoardState, FilledCellState, isCellState } from '../types'
 import { findWin } from '../utils'
+import useGameStore from '.'
 
 const X = FilledCellState.X
 const O = FilledCellState.O

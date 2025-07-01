@@ -1,6 +1,8 @@
 import { combine } from 'zustand/middleware'
+import {
+  assertIsBoardState, type BoardState, type CellState, FilledCellState, isBoardState,
+} from '../types'
 import { findWin, initialiseBoardState, turnValid } from '../utils'
-import { assertIsBoardState, BoardState, CellState, FilledCellState, isBoardState } from '../types'
 
 const getBoardStateAtPath = (board: BoardState, path: number[]): BoardState => {
   if (path.length <= 0) return board

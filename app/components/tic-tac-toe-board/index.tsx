@@ -1,9 +1,9 @@
 'use client'
 
-import Results from './results'
-import Board from './board'
-import TurnIndicator from './turn-indicator'
 import { Fragment } from 'react'
+import Board from './board'
+import Results from './results'
+import TurnIndicator from './turn-indicator'
 import ZoomControl from './zoom-control'
 
 const DevTools = process.env.NODE_ENV === 'development'

@@ -1,9 +1,9 @@
+import classNames from 'classnames'
+import { type JSX } from 'react'
 import { useShallow } from 'zustand/shallow'
 import useGameStore from './store'
+import { type BoardState, isBoardState } from './types'
 import { findWin, pickNestedBoardState, turnValid } from './utils'
-import { BoardState, isBoardState } from './types'
-import classNames from 'classnames'
-import { JSX } from 'react'
 
 const maxDisplayDepth = 3
 
