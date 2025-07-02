@@ -9,7 +9,4 @@ export default defineConfig({
     includeSource: ['app/**/*.{ts,tsx}'],
     setupFiles: ['./vitest-setup.ts'],
   },
-  define: {
-    'import.meta.vitest': 'undefined',
-  },
 })
