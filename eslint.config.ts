@@ -2,10 +2,10 @@ import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { FlatCompat } from '@eslint/eslintrc'
 import stylistic from '@stylistic/eslint-plugin'
-import { Linter } from 'eslint'
-import tseslint from 'typescript-eslint'
-import { FlatConfig } from '@typescript-eslint/utils/ts-eslint'
+import { type FlatConfig } from '@typescript-eslint/utils/ts-eslint'
+import { type Linter } from 'eslint'
 import tailwind from 'eslint-plugin-tailwindcss'
+import tseslint from 'typescript-eslint'
 
 // eslint configs are kinda weirdly structured
 // see: https://github.com/typescript-eslint/typescript-eslint/issues/8613
@@ -28,6 +28,7 @@ const eslintConfig = [
 
   // next/typescript includes recommended, so just add the type checked parts here
   ...tseslint.config(
+    // eslint-disable-next-line import/no-named-as-default-member
     tseslint.configs.recommendedTypeCheckedOnly,
     {
       languageOptions: {
@@ -40,6 +41,7 @@ const eslintConfig = [
   ),
   // and ignore the type checked parts for non-ts files
   {
+    // eslint-disable-next-line import/no-named-as-default-member
     ...tseslint.configs.disableTypeChecked,
     files: ['**/*.mjs'],
   },
@@ -56,6 +58,32 @@ const eslintConfig = [
       '@stylistic/jsx-one-expression-per-line': ['error', { allow: 'single-line' }],
       'max-len': ['error', { code: 100 }],
       '@stylistic/quotes': ['error', 'single'],
+    },
+  },
+  ...compat.extends('plugin:import/recommended', 'plugin:import/typescript'),
+  {
+    rules: {
+      'import/no-unused-modules': ['warn', {
+        unusedExports: true,
+        ignoreExports: [
+          // configs
+          '*.config.{ts,js,mjs}',
+          'instrumentation.ts',
+          'instrumentation-*.ts',
+
+          // entrypoints
+          'app/**/page.tsx',
+          'app/**/layout.tsx',
+          'app/global-error.tsx',
+        ],
+      }],
+      // 'import/consistent-type-specifier-style': 'error',
+      'import/newline-after-import': 'error',
+      'import/order': ['error', {
+        'alphabetize': { order: 'asc', orderImportKind: 'asc', caseInsensitive: true },
+        'newlines-between': 'never',
+      }],
+      '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
     },
   },
 ] satisfies Config[]

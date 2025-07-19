@@ -38,7 +38,7 @@ export const assertIsBoardState: (v: unknown) => asserts v is BoardState = (v) =
   if (!isBoardState(v)) throw new Error(`Board state is invalid: ${JSON.stringify(v)}`)
 }
 
-export const isBoardCondition = (v: unknown): v is BoardCondition => typeof v === 'string'
+const isBoardCondition = (v: unknown): v is BoardCondition => typeof v === 'string'
   && isNaN(Number(v))
   && Object.keys(BoardCondition).includes(v)
 export const assertIsBoardCondition: (v: unknown) => asserts v is BoardCondition = (v) => {

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
-import createCoreSlice, { CoreSlice } from './core-slice'
-import createDevToolsSlice, { DevToolsSlice } from './dev-tools-slice'
+import createCoreSlice, { type CoreSlice } from './core-slice'
+import createDevToolsSlice, { type DevToolsSlice } from './dev-tools-slice'
 
 // We have to specify the type of this store when using the slices pattern
 // See: https://github.com/pmndrs/zustand/issues/508#issuecomment-885469427

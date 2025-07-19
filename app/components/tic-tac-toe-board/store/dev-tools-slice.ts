@@ -1,8 +1,8 @@
-import { StateCreator } from 'zustand'
+import { type StateCreator } from 'zustand'
 import {
-  assertIsBoardState, BoardCondition, BoardState, FilledCellState, SingleLevelBoardState,
+  assertIsBoardState, BoardCondition, type BoardState, FilledCellState, type SingleLevelBoardState,
 } from '../types'
-import { CoreSlice } from './core-slice'
+import { type CoreSlice } from './core-slice'
 import allPossibleSingleLevelBoardStates from './states.json'
 import useGameStore from '.'
 

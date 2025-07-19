@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import useGameStore from './store'
 import { useShallow } from 'zustand/shallow'
+import useGameStore from './store'
 import { findWin } from './utils'
 
 type Props = {

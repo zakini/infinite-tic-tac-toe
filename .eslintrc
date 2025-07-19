@@ -1,0 +1,2 @@
+// HACK added to make eslint-plugin-import happy
+// see: https://github.com/import-js/eslint-plugin-import/issues/3079

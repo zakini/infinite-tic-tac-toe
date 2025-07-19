@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import Board from './board'
-import userEvent from '@testing-library/user-event'
 import useGameStore from './store'
-import { BoardState, FilledCellState } from './types'
+import { type BoardState, FilledCellState } from './types'
 
 const X = FilledCellState.X
 const O = FilledCellState.O

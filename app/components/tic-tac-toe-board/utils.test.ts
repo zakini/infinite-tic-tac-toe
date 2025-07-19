@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { BoardState, FilledCellState } from './types'
+import { type BoardState, FilledCellState } from './types'
 import { findWin } from './utils'
 
 const X = FilledCellState.X

@@ -1,6 +1,6 @@
-import { FormEventHandler, useState } from 'react'
-import { assertIsBoardCondition, BoardCondition } from './types'
+import { type FormEventHandler, useState } from 'react'
 import useGameStore from './store'
+import { assertIsBoardCondition, BoardCondition } from './types'
 
 export default function DevTools() {
   const [boardCondition, setBoardCondition] = useState(BoardCondition.Empty)

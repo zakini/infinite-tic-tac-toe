@@ -1,9 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
-import TicTacToeBoard from '.'
 import userEvent from '@testing-library/user-event'
-import { BoardState, FilledCellState } from './types'
+import { describe, expect, it } from 'vitest'
 import useGameStore from './store'
+import { type BoardState, FilledCellState } from './types'
+import TicTacToeBoard from '.'
 
 const X = FilledCellState.X
 const O = FilledCellState.O
