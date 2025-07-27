@@ -1,4 +1,4 @@
-import classNames from 'classnames'
+import { clsx } from 'clsx'
 import { type JSX } from 'react'
 import { useShallow } from 'zustand/shallow'
 import useGameStore from './store'
@@ -51,7 +51,7 @@ export default function Board({ cellPath = [], disabled = null }: Props) {
         style={{ padding: displayDepth }}
       >
         <div
-          className={classNames(
+          className={clsx(
             'size-full',
             showSummary && win ? 'bg-green-500' : 'bg-gray-400',
           )}
@@ -76,7 +76,7 @@ export default function Board({ cellPath = [], disabled = null }: Props) {
   return (
     <Container
       aria-label={`in-progress ${cellPath.length <= 0 ? 'board' : 'sub-board'}`}
-      className={classNames(
+      className={clsx(
         'grid aspect-square w-full grid-cols-3 grid-rows-3 gap-px bg-black p-px',
         {
           'hover:ring-3 hover:ring-red-500 focus:ring-3 focus:ring-red-500':
@@ -104,7 +104,7 @@ export default function Board({ cellPath = [], disabled = null }: Props) {
               <Cell
                 key={i}
                 aria-label={cell === null ? 'empty cell' : `cell taken by ${cell}`}
-                className={classNames(
+                className={clsx(
                   'relative aspect-square',
                   {
                     'bg-green-500': cellPartOfWin,

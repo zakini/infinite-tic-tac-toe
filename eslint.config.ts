@@ -4,6 +4,7 @@ import { FlatCompat } from '@eslint/eslintrc'
 import stylistic from '@stylistic/eslint-plugin'
 import { type FlatConfig } from '@typescript-eslint/utils/ts-eslint'
 import { type Linter } from 'eslint'
+import tailwind from 'eslint-plugin-better-tailwindcss'
 import tseslint from 'typescript-eslint'
 
 // eslint configs are kinda weirdly structured
@@ -47,6 +48,14 @@ const eslintConfig = [
 
   // code style
   stylistic.configs['recommended-flat'],
+  {
+    plugins: {
+      'better-tailwindcss': tailwind,
+    },
+    rules: {
+      ...tailwind.configs['recommended-error'].rules,
+    },
+  },
 
   // the bikeshed
   {
