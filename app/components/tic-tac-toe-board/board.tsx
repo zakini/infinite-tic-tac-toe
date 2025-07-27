@@ -79,7 +79,7 @@ export default function Board({ cellPath = [], disabled = null }: Props) {
       className={classNames(
         'grid aspect-square w-full grid-cols-3 grid-rows-3 gap-px bg-black p-px',
         {
-          'hover:ring hover:ring-red-500 focus:ring focus:ring-red-500':
+          'hover:ring-3 hover:ring-red-500 focus:ring-3 focus:ring-red-500':
             Container === 'button',
         },
       )}
