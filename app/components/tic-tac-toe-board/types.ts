@@ -24,6 +24,15 @@ export enum BoardCondition {
   WonO = 'WonO',
 }
 
+const boardConditionLabels = {
+  [BoardCondition.Empty]: 'Empty',
+  [BoardCondition.InProgress]: 'In Progress',
+  [BoardCondition.Drawn]: 'Drawn',
+  [BoardCondition.WonX]: 'Won by X',
+  [BoardCondition.WonO]: 'Won by O',
+}
+export const boardConditionLabel = (condition: BoardCondition) => boardConditionLabels[condition]
+
 export const isCellState = (v: unknown): v is CellState => v === null
   || (typeof v === 'string' && Object.values(FilledCellState).includes(v))
 export const isBoardState = (v: unknown): v is BoardState => Array.isArray(v)

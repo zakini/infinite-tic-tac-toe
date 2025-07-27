@@ -7,7 +7,7 @@ import TurnIndicator from './turn-indicator'
 import ZoomControl from './zoom-control'
 
 const DevTools = process.env.NODE_ENV === 'development'
-  ? await import('./dev-tools').then(m => m.default)
+  ? await import('@/components/dev-tools').then(m => m.default)
   : Fragment
 
 export default function TicTacToeBoard() {
