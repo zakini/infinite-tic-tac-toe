@@ -77,7 +77,6 @@ const eslintConfig = [
           'app/global-error.tsx',
         ],
       }],
-      // 'import/consistent-type-specifier-style': 'error',
       'import/newline-after-import': 'error',
       'import/order': ['error', {
         'alphabetize': { order: 'asc', orderImportKind: 'asc', caseInsensitive: true },
