@@ -10,8 +10,8 @@ import fs from 'fs/promises'
 import path from 'path'
 import {
   BoardCondition, FilledCellState, type SingleLevelBoardState,
-} from '@/app/components/tic-tac-toe-board/types'
-import { findWin, initialiseBoardState } from '@/app/components/tic-tac-toe-board/utils'
+} from '@/components/tic-tac-toe-board/types'
+import { findWin, initialiseBoardState } from '@/components/tic-tac-toe-board/utils'
 
 /**
  * Find the next board state permutation after the given one

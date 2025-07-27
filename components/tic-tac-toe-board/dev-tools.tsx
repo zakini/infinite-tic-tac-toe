@@ -2,10 +2,10 @@
 
 import { Settings } from 'lucide-react'
 import { useState } from 'react'
-import useGameStore from '@/app/components/tic-tac-toe-board/store'
+import useGameStore from '@/components/tic-tac-toe-board/store'
 import {
   assertIsBoardCondition, BoardCondition, boardConditionLabel,
-} from '@/app/components/tic-tac-toe-board/types'
+} from '@/components/tic-tac-toe-board/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
