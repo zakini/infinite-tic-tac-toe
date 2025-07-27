@@ -1,9 +1,9 @@
-import { clsx } from 'clsx'
 import { type JSX } from 'react'
 import { useShallow } from 'zustand/shallow'
 import useGameStore from './store'
 import { type BoardState, isBoardState } from './types'
 import { findWin, pickNestedBoardState, turnValid } from './utils'
+import { cn } from '@/lib/utils'
 
 const maxDisplayDepth = 3
 
@@ -51,7 +51,7 @@ export default function Board({ cellPath = [], disabled = null }: Props) {
         style={{ padding: displayDepth }}
       >
         <div
-          className={clsx(
+          className={cn(
             'size-full',
             showSummary && win ? 'bg-green-500' : 'bg-gray-400',
           )}
@@ -76,7 +76,7 @@ export default function Board({ cellPath = [], disabled = null }: Props) {
   return (
     <Container
       aria-label={`in-progress ${cellPath.length <= 0 ? 'board' : 'sub-board'}`}
-      className={clsx(
+      className={cn(
         'grid aspect-square w-full grid-cols-3 grid-rows-3 gap-px bg-black p-px',
         {
           'hover:ring-3 hover:ring-red-500 focus:ring-3 focus:ring-red-500':
@@ -104,7 +104,7 @@ export default function Board({ cellPath = [], disabled = null }: Props) {
               <Cell
                 key={i}
                 aria-label={cell === null ? 'empty cell' : `cell taken by ${cell}`}
-                className={clsx(
+                className={cn(
                   'relative aspect-square',
                   {
                     'bg-green-500': cellPartOfWin,
