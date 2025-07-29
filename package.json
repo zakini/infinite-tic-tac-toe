@@ -39,7 +39,7 @@
     "eslint-config-next": "15.1.5",
     "eslint-plugin-better-tailwindcss": "^3.7.2",
     "eslint-plugin-import": "^2.32.0",
-    "jiti": "^2.4.2",
+    "jiti": "^2.5.1",
     "jsdom": "^26.0.0",
     "postcss": "^8",
     "tailwindcss": "^4.1.11",
